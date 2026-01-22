@@ -1,0 +1,8 @@
+{% extends 'quotes/base.html' %}
+{% load static %}
+{% block content %}
+  <!-- Have to call the image path with the static directory up front-->
+  <!-- If you used the exact template variable {{pic}} it would think the image path exists under the [localdirectory/quotes]/[image path]-->
+  <img src="{% static pic %}" width="200">
+  <p>{{ quote }}</p>
+{% endblock %}

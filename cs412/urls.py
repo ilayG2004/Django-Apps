@@ -16,8 +16,13 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-]
+    #Project level url which refers anything with the string hw to the hello world app
+    path("hw/", include("hw.urls")),
+    path("quotes/", include("quotes.urls")),
+] + static(settings.STATIC_URL, DOCUMENT_ROOT=settings.STATIC_ROOT)

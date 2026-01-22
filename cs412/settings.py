@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-2#74p^^8mk9u2ln!4vrb6f(3e(p#b#39)z7a@_qu)%-gmfd9td
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["cs-webapps.bu.edu"]
+ALLOWED_HOSTS = ["*","cs-webapps.bu.edu"]
 
 
 # Application definition
@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "hw",
+    "quotes",
 ]
 
 MIDDLEWARE = [
@@ -57,6 +59,7 @@ TEMPLATES = [
         "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
+            "string_if_invalid": "WARNING: {{%s}} not a valid context variable",
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
@@ -121,6 +124,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Tells Django where to find our static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = 'static/' # note: no leading slash!
 

@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>LeBron Quote of the Day</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+  </head>
+  <body>
+    <h1>LeBron Quote of the Day</h1>
+    
+    <nav class="nav">
+      <a href="{% url 'quote' %}">Random Quote</a>
+      <a href="{% url 'show_all' %}">Show All</a>
+      <a href="{% url 'about' %}">About</a>
+    </nav>
+    <hr>
+    {% block content %}
+    {% endblock %}
+    <footer>
+      This page was created by ilay2004@bu.edu. Generated at {{time}}
+    </footer>
+  </body>
+</html>
