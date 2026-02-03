@@ -1,0 +1,11 @@
+{% extends 'restaraunt/base.html' %}
+{% block content %}
+  <h1>Thank you for your order {{ name }}!</h1>
+  <p>You ordered: {{ food }}.</p>
+  {% if instructions != "" %}
+    <p>With the following special instructions: {{ instructions }}</p>
+  {% endif %}
+  <p>We will contact you on {{ phone }} and {{ email }} when we are ready. </p>
+  <br>
+  <p>Expected ready time is: {{ eta }}</p>
+{% endblock %}

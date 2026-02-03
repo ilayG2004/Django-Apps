@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Raising Sugarcanes</title>
+    <link rel="stylesheet" href="{% static 'restaraunt.css' %}">
+    <script src="{% static 'restaraunt.js' %}"></script>
+  </head>
+  <body>
+    <h1>Raising Sugarcanes</h1>
+    <nav>
+      <a href="{% url 'main_page' %}">Main</a>
+      <a href="{% url 'order_form' %}">Order</a>
+    </nav>
+    {% block content %}
+
+    {% endblock %}
+  </body>
+</html>

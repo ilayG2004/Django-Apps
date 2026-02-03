@@ -25,4 +25,5 @@ urlpatterns = [
     #Project level url which refers anything with the string hw to the hello world app
     path("hw/", include("hw.urls")),
     path("quotes/", include("quotes.urls")),
+    path("restaurant/", include("restaurant.urls"))
 ] + static(settings.STATIC_URL, DOCUMENT_ROOT=settings.STATIC_ROOT)

@@ -1,0 +1,40 @@
+{% extends 'restaraunt/base.html' %}
+{% block content %}
+  <form action="{% url 'submit_order' %}", method="POST">
+    {% csrf_token %}
+    <h3>Food</h3>
+    
+    <input type="checkbox" name="3 finger combo" id="3fingercombo">
+    <label for="3fingercombo">3 finger combo - $9.99</label><br>
+    <input type="checkbox" name="4 finger combo" id="4fingercombo">
+    <label for="4fingercombo">4 finger combo - $11.99</label><br>
+    <input type="checkbox" name="6 finger combo" id="6fingercombo">
+    <label for="6fingercombo">6 finger combo - $13.99</label><br>
+    <input type="checkbox" name="Chicken Sandwhich" id="sandwichCheckbox" onClick="show_extra()">
+    <label for="sandwichCheckbox">Chicken Sandwhich - $9.99</label><br>
+    <div id="pickleOptions" style="display:none; margin-left:1rem;">
+      <label>
+        <input type="checkbox" name="no pickles">
+        No pickles
+      </label>
+    </div>
+
+    <h3>Today's Special</h3>
+    <input type="checkbox" name="special" id="special">
+    <label for="special">{{ special }}</label><br>
+
+    <h3>Special Instructions</h3>
+    <textarea name="instructions" rows="8" cols="40"></textarea>
+
+    <h3>Customer Info</h3>
+    <p>Name</p>
+    <input type="text" name="customer_name">
+    <p>Phone</p>
+    <input type="text" name="customer_phone">
+    <p>Email</p>
+    <input type="text" name="customer_email">
+
+    <br>
+    <input type="submit" class="submit-btn">
+  </form>
+{% endblock %}
