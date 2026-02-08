@@ -1,0 +1,13 @@
+{% extends 'mini_insta/base.html' %}
+{% block content %}
+  {% for profile in profiles %}
+    <div class="profile-rectangle">
+      <img src={{profile.profile_image_url}} width="50px" height="auto">
+      <div class="profile-innerColumn">
+        <h2>{{profile.username}}</h2>
+        <h3>{{profile.display_name}}</h3>
+      </div>
+    </div>
+    <hr>
+  {% endfor %}
+{% endblock %}
