@@ -5,6 +5,13 @@ from .models import Profile
 
 # Create your views here.
 class ProfileListView(ListView):
+  """ Uses show_all_profiles.html with ListView to display all profiles """
   model=Profile
   template_name="mini_insta/show_all_profiles.html"
   context_object_name="profiles"
+
+class ProfileDetailView(DetailView):
+  """ Uses show_profile.html to show a single profile """
+  model=Profile
+  template_name="mini_insta/show_profile.html"
+  context_object_name="profile"
