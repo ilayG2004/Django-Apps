@@ -3,13 +3,22 @@
 <html>
   <head>
     <title>Mini Insta</title>
+    <link rel="stylesheet"  href="{% static 'mini_insta.css' %}">
   </head>
   <body>
     <h2>Mini Insta</h2>
     <hr>
-    {% block content %}
+    <div class="pane-parent">
+      <div class="nav-pane">
+        <a href="{% url 'show_all_profiles' %}"><img src="{% static 'images/frutiger_aero_home.png' %}"></a>
+      </div>
 
-    {% endblock %}
-    <footer><a href="{% url 'show_all_profiles' %}">Home</a></footer>
+      <div class="users-pane">
+        {% block content %}
+
+        {% endblock %}
+
+      </div>
+    </div>
   </body>
 </html>

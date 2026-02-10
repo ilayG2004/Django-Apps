@@ -1,15 +1,17 @@
 {% extends 'mini_insta/base.html' %}
 {% block content %}
-  <div class="follows-and-profile">
-    <img src={{profile.profile_image_url}}>
-    <div class="name-and-follows">
-      <h2>{{profile.display_name}}</h2>
-      <h3>{{profile.username}}</h3>
-      <div class="follows">
-        <p>Followers: TBD</p>
-        <p>Following: TBD</p>
+  <div class="profile-overview">
+    <div class="follows-and-profile">
+      <img src={{profile.profile_image_url}}>
+      <div class="name-and-follows">
+        <h2>{{profile.display_name}}</h2>
+        <h3>{{profile.username}}</h3>
+        <div class="follows">
+          <p>Followers: TBD</p>
+          <p>Following: TBD</p>
+        </div>
       </div>
     </div>
+    <p class="bio">{{profile.bio_text}}</p>
   </div>
-  <p>{{profile.bio_text}}</p>
 {% endblock %}
