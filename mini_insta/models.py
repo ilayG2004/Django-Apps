@@ -2,7 +2,10 @@
 # Author: Ilay Guler (ilay2004@bu.edu), 2/12/2026
 # Description: Setting up model for our Django app's db. This models.py defines the Profile model for our mini_insta app.
 
+#Changes 2/19: Added Post and Photo models to database. Each with their own fields and toString method. Added get_absolute_url to the Profile model.
+
 from django.db import models
+from django.urls import reverse
 
 # Create your models here.
 class Profile(models.Model):
@@ -16,3 +19,38 @@ class Profile(models.Model):
   def __str__(self):
     """ To string of profile object. """
     return self.username
+  def get_all_posts(self):
+    """ Return queryset of all Post instances whose profile attribute matches this Profile instance. Ordered by timestamp """
+    posts = Post.objects.filter(profile=self).order_by('timestamp')
+    return posts
+  def get_absolute_url(self):
+    """ Return the URL to display one instance of this model """
+    return reverse('profile', kwargs={'pk': self.pk})
+
+  
+class Post(models.Model):
+  """ Defines fields of a post, which has Profile as a foreign key. """
+  """ Each profile can have many posts. """
+  profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+  timestamp = models.DateField(auto_now=True)
+  caption = models.TextField(blank=True)
+
+  def __str__(self):
+    """ To string of Post object. """
+    return f"{self.profile.username}: {self.caption}" 
+  
+  def get_all_photos(self):
+    """ Return queryset of all Post instances whose profile attribute matches this Profile instance. Ordered by timestamp """
+    photos = Photo.objects.filter(post=self)
+    return photos
+
+class Photo(models.Model):
+  """ Defines fields of a photo, which defines Post as a foreign key. """
+  """ Each post can have many photos. """
+  post = models.ForeignKey(Post, on_delete=models.CASCADE)
+  image_url = models.URLField(blank=True)
+  timestamp = models.DateField(auto_now=True)
+
+  def __str__(self):
+    """ To string of Photo object. """
+    return f"{self.post.profile.username} -> {self.post.caption} -> {self.image_url}"

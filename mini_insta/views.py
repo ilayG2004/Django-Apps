@@ -2,9 +2,13 @@
 # Author: Ilay Guler (ilay2004@bu.edu), 2/12/2026
 # Description: Using ListView and DetailView to render html templates using database model objects
 
+# Changes 2/19: Added PostDetailView to show a DetailView for a single Post object. 
+# And CreatePostView which handles the GET of a create_post_form.html to load a HTML form and the creation of a new Post and Photo object when the form is submitted.
 from django.shortcuts import render
-from django.views.generic import ListView, DetailView
-from .models import Profile
+from django.views.generic import ListView, DetailView, CreateView
+from .models import Profile, Post, Photo
+from .forms import CreatePostForm
+from django.urls import reverse
 
 
 # Create your views here.
@@ -19,3 +23,52 @@ class ProfileDetailView(DetailView):
   model=Profile
   template_name="mini_insta/show_profile.html"
   context_object_name="profile"
+
+class PostDetailView(DetailView):
+  """ Uses show_post.html with DetailView and the Post model to show a single post """
+  model= Post
+  template_name="mini_insta/show_post.html"
+  context_object_name="post"
+
+class CreatePostView(CreateView):
+  """ A view to create a Post for a Profile """
+  """ Uses CreatePostForm to generate a form, and dynamically populate create_post_form.html """
+  form_class = CreatePostForm
+  template_name = "mini_insta/create_post_form.html"
+  context_object_name = "profile"
+
+  def get_success_url(self):
+    """ Redirects us to the profile page after a new post is made for it """
+    #self.kwargs is a dictionary containing URL parameters
+    pk = self.kwargs['pk']
+    return reverse('show_profile', kwargs={'pk':pk})
+  
+  def form_valid(self, form):
+    """ Handles form submission & saves new object to DB """
+    """ We manually add the foriegn key (of Profile) to the Post object. And instantiate a new Photo object with its fkey as this Post"""
+    print(form.cleaned_data)
+
+    #Attach pk from URL to profile attribute of Post
+    pk = self.kwargs['pk']
+    profile = Profile.objects.get(pk=pk)
+    form.instance.profile=profile
+
+    post = form.save(commit=False)
+    post.save()
+
+    #Read the image url from request.POST
+    img_url = self.request.POST['image_url']
+    if img_url:
+        Photo.objects.create(post=post, image_url=img_url)
+
+    self.object = post
+    return super().form_valid(form)
+  
+  def get_context_data(self):
+    """ Allows us to access the profile object being referred to in the CreateView """
+    context = super().get_context_data()
+    pk=self.kwargs['pk']
+    profile = Profile.objects.get(pk=pk)
+    context['profile']=profile
+    return context
+  
