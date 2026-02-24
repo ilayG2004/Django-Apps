@@ -10,7 +10,8 @@ class Article(models.Model):
   text= models.TextField(blank=True)
   #Whenever we create a blog Article, it was set this field to the current time
   published = models.DateTimeField(auto_now=True)
-  image_url = models.URLField(blank=True)
+  image_file = models.ImageField(blank=True)
+
   
 
   def __str__(self):

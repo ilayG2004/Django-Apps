@@ -10,8 +10,12 @@
             {{article.text}}
           </p>
         </div>
-        <img src={{article.image_url}} width="100rem" height="auto">
-        
+        {% if article.image_file %}
+        <img src={{article.image_file.url}} width="100rem" height="auto">
+        {% else %}
+        <h3>No image</h3>
+        {% endif %}
+        <a href="{% url 'update_article' article.pk %}">Update Article</a>
       </article>
   </main>
   

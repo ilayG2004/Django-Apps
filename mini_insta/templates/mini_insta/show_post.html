@@ -9,7 +9,7 @@ Description: Display the post caption and timestamp, as well as all Photos assoc
     <div class="post-photos-row">
       {% for photo in post.get_all_photos %}
         <div class="post-photo-item">
-          <img src="{{photo.image_url}}">
+          <img src="{{photo.get_image_url}}">
           <p>{{photo.timestamp}}</p>
         </div>
       {% endfor %}

@@ -5,9 +5,9 @@
 # Changes 2/19: Added PostDetailView to show a DetailView for a single Post object. 
 # And CreatePostView which handles the GET of a create_post_form.html to load a HTML form and the creation of a new Post and Photo object when the form is submitted.
 from django.shortcuts import render
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from .models import Profile, Post, Photo
-from .forms import CreatePostForm
+from .forms import CreatePostForm, UpdateProfileForm
 from django.urls import reverse
 
 
@@ -56,10 +56,20 @@ class CreatePostView(CreateView):
     post = form.save(commit=False)
     post.save()
 
-    #Read the image url from request.POST
-    img_url = self.request.POST['image_url']
+    """
+    #Read the image url from request.POS
+    img_url = self.request.POST['files']
     if img_url:
         Photo.objects.create(post=post, image_url=img_url)
+    """
+
+    #Read the files
+    #self.request.POST is text fields only, while self.request.FILES contains files
+    img_files = self.request.FILES.getlist('files')
+    if len(img_files) > 0:
+      for file in img_files:
+        Photo.objects.create(post=post, image_file=file)
+        
 
     self.object = post
     return super().form_valid(form)
@@ -72,3 +82,8 @@ class CreatePostView(CreateView):
     context['profile']=profile
     return context
   
+class UpdateProfileView(UpdateView):
+  model=Profile
+  form_class=UpdateProfileForm
+  template_name="mini_insta/update_profile_form.html"
+  context_object_name="profile"

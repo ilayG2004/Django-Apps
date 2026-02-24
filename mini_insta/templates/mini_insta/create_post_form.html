@@ -6,12 +6,17 @@ Description: Create a post using the form fields specified from .forms CreatePos
 {% extends 'mini_insta/base.html' %}
 {% block content %}
   <h2>Create a Post for {{profile.username}}</h2>
-  <form method="POST" >
+  <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <table>
       {{form.as_table}}
+      <label>Upload photos</label>
+      <input type="file" name="files" multiple>
     </table>
     <input type="submit" name="submit">
-      <a href="{% url 'show_all_profiles' %}"><input type="button" name="cancel" value="Cancel"></a>
   </form>   
+  <!--Return to the profile-->
+  <form method="GET" action="{% url 'show_profile' profile.pk %}">
+    <input type="submit" name="cancel">
+  </form>
 {% endblock %}
