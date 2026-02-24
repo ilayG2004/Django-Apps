@@ -2,7 +2,7 @@
 {% block content %}
   <h2>Update Profile for {{profile.username}}</h2>
   <div>
-  <form method="POST">
+  <form method="POST" action="{% url 'update_profile' profile.pk %}">
     {% csrf_token %}
     <table>
     {{form.as_table}}

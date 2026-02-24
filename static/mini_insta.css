@@ -151,3 +151,16 @@ a:visited {
   text-decoration: none;
   font-weight: bold;
 }
+
+.delete-update-post-container div{
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  gap: 10rem;
+}
+
+.delete-update-post-container a {
+  border: white, 2px, solid;
+  text-decoration: none;
+  background-color: white;
+}

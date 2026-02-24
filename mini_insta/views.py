@@ -5,9 +5,9 @@
 # Changes 2/19: Added PostDetailView to show a DetailView for a single Post object. 
 # And CreatePostView which handles the GET of a create_post_form.html to load a HTML form and the creation of a new Post and Photo object when the form is submitted.
 from django.shortcuts import render
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Profile, Post, Photo
-from .forms import CreatePostForm, UpdateProfileForm
+from .forms import *
 from django.urls import reverse
 
 
@@ -74,16 +74,43 @@ class CreatePostView(CreateView):
     self.object = post
     return super().form_valid(form)
   
-  def get_context_data(self):
+  def get_context_data(self, **kwargs):
     """ Allows us to access the profile object being referred to in the CreateView """
-    context = super().get_context_data()
+    context = super().get_context_data(**kwargs)
     pk=self.kwargs['pk']
     profile = Profile.objects.get(pk=pk)
     context['profile']=profile
     return context
   
 class UpdateProfileView(UpdateView):
+  """ Used to update a Profile instance """
   model=Profile
   form_class=UpdateProfileForm
   template_name="mini_insta/update_profile_form.html"
   context_object_name="profile"
+
+class DeletePostView(DeleteView):
+  model=Post
+  template_name = "mini_insta/delete_post_form.html"
+
+  def get_context_data(self, **kwargs):
+    """ Passes in the post & profile context variables to the HTML template"""
+    context = super().get_context_data(**kwargs)
+    context['post'] = self.object
+    context['profile'] = self.object.profile
+    return context
+  
+  def get_success_url(self, **kwargs):
+    """ Goes back to the user profile after successful deletion """
+    return self.object.profile.get_absolute_url()
+
+class UpdatePostView(UpdateView):
+  model=Post
+  form_class=UpdatePostForm
+  template_name="mini_insta/update_post_form.html"
+  context_object_name = "post"
+
+  def get_success_url(self):
+    pk = self.kwargs['pk']
+    return reverse('show_post', kwargs={'pk':pk})
+  
