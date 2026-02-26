@@ -17,8 +17,8 @@ Changes 2/27: Added a form with a button input that takes user to the update pro
           <h3>{{profile.username}}</h3>
           <h4>Joined: {{profile.join_date}}</h4>
           <div class="follows">
-            <p>Followers: TBD</p>
-            <p>Following: TBD</p>
+            <a href="{% url 'show_followers' profile.pk %}">Followers: {{profile.get_num_followers}} </a>
+            <a href="{% url 'show_following' profile.pk %}">Following: {{profile.get_num_following}}</a>
           </div>
         </div>
       </div>

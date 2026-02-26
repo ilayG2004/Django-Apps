@@ -1,0 +1,22 @@
+<!--
+File: mini_insta/show_profile.html
+Author: Ilay Guler (ilay2004@bu.edu), 2/12/2026
+Description: Show list of following profiles of a profile instance
+-->
+{% extends 'mini_insta/base.html' %}
+{% block content %}
+  <h1>{{profile.username}} followers: </h1>
+  <div style="display: flex; flex-direction: column;">
+  {% for follower in profile.get_following %}
+  <div class="profile-rectangle">
+    <a href="{% url 'show_profile' follower.pk %}">
+      <img src="{{follower.profile_image_url}}" width="50px" height="50px">
+      <p> {{follower.username}} </p>
+      <p> {{follower.display_name}} </p>
+    </a>
+   
+    </div>
+     <hr/>
+  {% endfor %}
+   </div>
+{% endblock %}

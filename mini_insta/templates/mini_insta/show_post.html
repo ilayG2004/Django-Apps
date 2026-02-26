@@ -15,7 +15,13 @@ Description: Display the post caption and timestamp, as well as all Photos assoc
           </div>
         {% endfor %}
       </div>
+      <p><strong>Likes:</strong> {{post.get_likes.first.profile.username}} and {{post.get_likes.count|add:"-1"}} others</p>
       <p>{{post.caption}}</p>
+      <h4>Comments:</h4>
+      {% for comment in post.get_all_comments %}
+        <p style="margin-bottom: 0px;"><strong>{{comment.profile.username}}:</strong> {{comment.text}}</p>
+        <p style="font-size: 10px; margin-top: 0px;">{{comment.timestamp}}</p>
+      {% endfor %}
     </div>
     <div class="delete-update-post-container">
       <a href="{% url 'delete_post' post.pk %}">Delete Post</a>
