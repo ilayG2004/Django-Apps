@@ -56,6 +56,13 @@ class Profile(models.Model):
     following_list = self.get_following()
     return len(following_list)
 
+  def get_post_feed(self):
+    """ Returns a list (or QuerySet) of Posts, specifically for the profiles being followed by the profile on which the method was called."""
+    followed_profiles = self.get_following()
+    return Post.objects.filter(
+        profile__in=followed_profiles
+    ).order_by('-timestamp')
+
 class Follow(models.Model):
   profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="profile")
   follower_profile = models.ForeignKey(Profile,on_delete=models.CASCADE, related_name="follower_profile")

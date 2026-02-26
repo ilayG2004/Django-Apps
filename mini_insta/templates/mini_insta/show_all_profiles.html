@@ -6,6 +6,7 @@ Wrap each profile rectangle in a link which directs you to the DetailView of tha
 -->
 {% extends 'mini_insta/base.html' %}
 {% block content %}
+<div class="users-pane">
   {% for profile in profiles %}
     <div class="profile-rectangle">
       <a href="{% url 'show_profile' profile.pk %}">
@@ -17,4 +18,5 @@ Wrap each profile rectangle in a link which directs you to the DetailView of tha
       </a>
     </div>
   {% endfor %}
+  </div>
 {% endblock %}

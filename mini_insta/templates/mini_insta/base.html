@@ -17,19 +17,16 @@ Changes 2/19: Includes a footer with a link to create a post when under a user p
     <h2>Mini Insta</h2>
     <hr>
     <div class="pane-parent">
-      <div class="nav-pane">
-        <a href="{% url 'show_all_profiles' %}"><img src="{% static 'images/frutiger_aero_home.png' %}"></a>
-      </div>
 
-      <div class="users-pane">
         {% block content %}
 
         {% endblock %}
-      </div>
       <footer>
       {% if profile %}
-        <a href="{% url 'create_post' pk=profile.pk%}" class="create-post">Create Post</a>
+        <a href="{% url 'create_post' pk=profile.pk%}" class="footer-button">Create Post</a>
+        <a href="{% url 'show_feed' profile.pk %}" class="footer-button">Feed</a>
       {% endif %}
+      <a href="{% url 'show_all_profiles' %}" class="footer-button">Show All Profiles</a>
       </footer>
     </div>
     

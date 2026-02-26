@@ -5,6 +5,7 @@ Description: Show list of followers of a profile instance
 -->
 {% extends 'mini_insta/base.html' %}
 {% block content %}
+<div class="feed-pane">
   <h1>{{profile.username}} followers: </h1>
   <div style="display: flex; flex-direction: column;">
   {% for follower in profile.get_followers %}
@@ -18,5 +19,6 @@ Description: Show list of followers of a profile instance
     </div>
      <hr/>
   {% endfor %}
+   </div>
    </div>
 {% endblock %}

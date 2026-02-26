@@ -1,0 +1,37 @@
+{% extends 'mini_insta/base.html' %}
+{% block content %}
+  <div class="nav-pane">
+    <a href="{% url 'show_profile' profile.pk%}" class="footer-button">Back</a>
+  </div>
+  <div class="feed-pane">
+    {% if posts.count == 0 %}
+      <h1>No feed</h1>
+    {% endif %}
+    {% for post in posts %}
+      <div class="poster">
+        <img src="{{post.profile.profile_image_url}}">
+        <p>{{post.profile.username}}</p>
+      </div>
+      <div class="post-photos-wrapper">
+        <div class="post-photos-row">
+          {% for photo in post.get_all_photos %}
+            <div class="post-photo-item">
+              <img src="{{photo.get_image_url}}">
+              <p>{{photo.timestamp}}</p>
+            </div>
+          {% endfor %}
+        </div>
+        <p><strong>Likes:</strong> {{post.get_likes.first.profile.username}} and {{post.get_likes.count|add:"-1"}} others</p>
+        <p>{{post.caption}}</p>
+        <p><strong>Comments:</strong></p>
+        <div class="comments">
+          {% for comment in post.get_all_comments %}
+            <p style="margin-bottom: 0px;"><strong>{{comment.profile.username}}:</strong> {{comment.text}}</p>
+            <p style="font-size: 10px; margin-top: 0px;">{{comment.timestamp}}</p>
+          {% endfor %}
+        </div>
+      </div>
+      <hr>
+    {% endfor %}
+  </div>
+{% endblock %}
