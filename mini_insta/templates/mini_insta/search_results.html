@@ -1,0 +1,40 @@
+<!--
+File: mini_insta/search_results.html
+Author: Ilay Guler (ilay2004@bu.edu), 2/12/2026
+Description: Displays search results for profiles or posts
+-->
+{% extends "mini_insta/base.html" %}
+{% block content %}
+  <div class="feed-pane">
+  <h2>Search Results for "{{ query }}"</h2>
+  <h3>Matching Profiles</h3>
+  {% if profiles %}
+    <ul>
+      {% for profile in profiles %}
+        <li>
+          <a href="{% url 'show_profile' profile.pk %}">
+            <img src="{{profile.profile_image_url}}" width="100rem" height="auto">{{ profile.username }} ({{ profile.display_name }})
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No matching profiles found.</p>
+  {% endif %}
+  <hr>
+  <h3>Matching Posts</h3>
+  {% if posts %}
+    <ul>
+      {% for post in posts %}
+        <li>
+          <a href="{% url 'show_post' post.pk %}">
+            {{ post.caption }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No matching posts found.</p>
+  {% endif %}
+  </div>
+{% endblock %}
