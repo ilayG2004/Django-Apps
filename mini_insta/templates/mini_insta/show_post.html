@@ -5,6 +5,9 @@ Description: Display the post caption and timestamp, as well as all Photos assoc
 -->
 {% extends 'mini_insta/base.html' %}
 {% block content %}
+  <div class="nav-pane">
+    <a href="{% url 'show_profile' post.profile.pk %}" class="footer-button">Back</a>
+  </div>  
   <div class="feed-pane">
     <div class="poster">
         <img src="{{post.profile.profile_image_url}}">

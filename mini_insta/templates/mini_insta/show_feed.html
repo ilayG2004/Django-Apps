@@ -1,3 +1,8 @@
+<!--
+File: mini_insta/show_all_profiles.html
+Author: Ilay Guler (ilay2004@bu.edu), 2/19/2026
+Description: Create a post using the form fields specified from .forms CreatePostForm. Includes a submit button and a cancel button which takes you back.
+-->
 {% extends 'mini_insta/base.html' %}
 {% block content %}
   <div class="nav-pane">
@@ -21,7 +26,11 @@
             </div>
           {% endfor %}
         </div>
-        <p><strong>Likes:</strong> {{post.get_likes.first.profile.username}} and {{post.get_likes.count|add:"-1"}} others</p>
+        {% if post.get_likes.count > 0 %}
+          <p><strong>Likes:</strong> {{post.get_likes.first.profile.username}} and {{post.get_likes.count|add:"-1"}} others</p>
+        {% else %}
+          <p><strong>Likes:</strong> 0</p>
+        {% endif %}
         <p>{{post.caption}}</p>
         <p><strong>Comments:</strong></p>
         <div class="comments">
