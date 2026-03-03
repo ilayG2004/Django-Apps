@@ -8,7 +8,7 @@ Description: Displays search bar for a profile or posts
 {% block content %}
 <div class="feed-pane">
   <h3>Search profiles or posts </h3>
-  <form method="GET" action="{% url 'search' profile.pk %}">
+  <form method="GET" action="{% url 'search' %}">
     {% csrf_token %}
     <input type="text" name="query">
     <input type="submit" name="submit">

@@ -27,9 +27,11 @@ Changes 2/27: Added a form with a button input that takes user to the update pro
         </div>
       </div>
       <p class="bio">{{profile.bio_text}}</p>
-      <form action="{% url 'update_profile' profile.pk%}" method="GET">
-        <input type="submit" name="update" value="Update Profile">
-      </form>
+      {% if request.user.is_authenticated and request.user == profile.user %}
+        <form action="{% url 'update_profile' %}" method="GET">
+          <input type="submit" name="update" value="Update Profile">
+        </form>
+      {% endif%}
     </div>
     <div class="posts">
       {% for post in profile.get_all_posts %}

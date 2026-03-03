@@ -16,7 +16,7 @@ Description: Create a post using the form fields specified from .forms CreatePos
     <input type="submit" name="submit">
   </form>   
   <!--Return to the profile-->
-  <form method="GET" action="{% url 'show_profile' profile.pk %}">
-    <input type="submit" name="cancel">
+  <form method="GET" action="{% url 'my_profile' %}">
+    <input type="submit" name="cancel" value="Cancel">
   </form>
 {% endblock %}

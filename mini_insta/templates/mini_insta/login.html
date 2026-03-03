@@ -1,0 +1,11 @@
+<!--Allows users to login via the django auth views login view which provides for us a form and handles authentication -->
+{% extends 'mini_insta/base.html' %}
+{% block content %}
+  <form method="POST" action="{% url 'login' %}">
+    {% csrf_token %}
+    {{form.as_table}}
+    <input type="submit" value="Login">
+    <input type="hidden" name="next" value="{% url 'my_profile' %}">
+  </form>
+{% endblock %}
+

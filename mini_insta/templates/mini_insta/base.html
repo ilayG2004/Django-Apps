@@ -22,12 +22,29 @@ Changes 2/19: Includes a footer with a link to create a post when under a user p
 
         {% endblock %}
       <footer>
+      <!-- If we are on the profile page & the user looking at the profile is the authenticated one -->
       {% if profile %}
-        <a href="{% url 'create_post' pk=profile.pk%}" class="footer-button">Create Post</a>
-        <a href="{% url 'show_feed' profile.pk %}" class="footer-button">Feed</a>
-        <a href="{% url 'search' profile.pk %}" class="footer-button">Search</a>
+        {% if request.user.is_authenticated and request.user == profile.user %}
+          <a href="{% url 'create_post' %}" class="footer-button">Create Post</a>
+          <a href="{% url 'show_feed' %}" class="footer-button">Feed</a>
+          <a href="{% url 'search' %}" class="footer-button">Search</a>
+        {% else %}
+          <p> User looking at this page, {{request.user}}, is not the user for this profile: {{profile.user}} </p>
+
+        {% endif %}
       {% endif %}
       <a href="{% url 'show_all_profiles' %}" class="footer-button">Show All Profiles</a>
+      {% if request.user.is_authenticated %}
+        <p>Logged in as: {{request.user}}</p> 
+        <form method="POST" action="{% url 'logout'%}">
+          {% csrf_token %}
+          <input type="submit" class="footer-button" value="Logout">
+        </form>
+      {% else %}
+        <p>Not logged in: <a href="{% url 'login' %}" class="footer-button">Login</a></p>
+       
+      {% endif %}
+
       </footer>
     </div>
     

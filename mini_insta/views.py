@@ -7,11 +7,12 @@
 
 # Changes 2/27: Added the views for Followers, Following, Feed, Search
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .models import Profile, Post, Photo
 from .forms import *
 from django.urls import reverse
 from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin 
 
 
 
@@ -21,6 +22,14 @@ class ProfileListView(ListView):
   model=Profile
   template_name="mini_insta/show_all_profiles.html"
   context_object_name="profiles"
+
+class MyProfileView(DetailView):
+  model=Profile
+  template_name="mini_insta/show_profile.html"
+  context_object_name="profile"
+
+  def get_object(self):
+        return Profile.objects.get(user=self.request.user)
 
 class ProfileDetailView(DetailView):
   """ Uses show_profile.html with DetailView and the Profile model to show a single profile """
@@ -34,7 +43,7 @@ class PostDetailView(DetailView):
   template_name="mini_insta/show_post.html"
   context_object_name="post"
 
-class CreatePostView(CreateView):
+class CreatePostView(CreateView, LoginRequiredMixin):
   """ A view to create a Post for a Profile """
   """ Uses CreatePostForm to generate a form, and dynamically populate create_post_form.html """
   form_class = CreatePostForm
@@ -44,22 +53,15 @@ class CreatePostView(CreateView):
   def get_success_url(self):
     """ Redirects us to the profile page after a new post is made for it """
     #self.kwargs is a dictionary containing URL parameters
-    pk = self.kwargs['pk']
-    return reverse('show_profile', kwargs={'pk':pk})
+    return reverse('my_profile')
   
   def form_valid(self, form):
     """ Handles form submission & saves new object to DB """
     """ We manually add the foriegn key (of Profile) to the Post object. And instantiate a new Photo object with its fkey as this Post"""
-    print(form.cleaned_data)
-
-    #Attach pk from URL to profile attribute of Post
-    pk = self.kwargs['pk']
-    profile = Profile.objects.get(pk=pk)
-    form.instance.profile=profile
-
+    profile = Profile.objects.get(user=self.request.user)
+    form.instance.profile = profile
     post = form.save(commit=False)
     post.save()
-
     """
     #Read the image url from request.POS
     img_url = self.request.POST['files']
@@ -81,19 +83,28 @@ class CreatePostView(CreateView):
   def get_context_data(self, **kwargs):
     """ Allows us to access the profile object being referred to in the CreateView """
     context = super().get_context_data(**kwargs)
-    pk=self.kwargs['pk']
-    profile = Profile.objects.get(pk=pk)
+    profile = Profile.objects.get(user=self.request.user)
     context['profile']=profile
     return context
   
-class UpdateProfileView(UpdateView):
+  def get_login_url(self):
+    """Return the URL for this app's login page"""
+    return reverse('login')
+  
+class UpdateProfileView(UpdateView, LoginRequiredMixin):
   """ Used to update a Profile instance """
   model=Profile
   form_class=UpdateProfileForm
   template_name="mini_insta/update_profile_form.html"
   context_object_name="profile"
+  def get_object(self):
+        return Profile.objects.get(user=self.request.user)
+  
+  def get_login_url(self):
+     """Return the URL for this app's login page"""
+     return reverse('login')
 
-class DeletePostView(DeleteView):
+class DeletePostView(DeleteView, LoginRequiredMixin):
   model=Post
   template_name = "mini_insta/delete_post_form.html"
 
@@ -107,8 +118,12 @@ class DeletePostView(DeleteView):
   def get_success_url(self, **kwargs):
     """ Goes back to the user profile after successful deletion """
     return self.object.profile.get_absolute_url()
+  
+  def get_login_url(self):
+    """Return the URL for this app's login page"""
+    return reverse('login')
 
-class UpdatePostView(UpdateView):
+class UpdatePostView(UpdateView, LoginRequiredMixin):
   """ Shows form to update a post """
   model=Post
   form_class=UpdatePostForm
@@ -119,6 +134,11 @@ class UpdatePostView(UpdateView):
     """ Redirects to the post page on submission """
     pk = self.kwargs['pk']
     return reverse('show_post', kwargs={'pk':pk})
+  
+  def get_login_url(self):
+    """Return the URL for this app's login page"""
+    return reverse('login')
+  
   
 class ShowFollowersDetailView(DetailView):
   """ Shows followers of a profile """
@@ -132,28 +152,32 @@ class ShowFollowingDetailView(DetailView):
   template_name="mini_insta/show_following.html"
   context_object_name = "profile"
 
-class PostFeedListView(ListView):
+class PostFeedListView(ListView, LoginRequiredMixin):
   model = Post
   template_name = "mini_insta/show_feed.html"
   context_object_name = "posts"
 
   def get_queryset(self):
       """ """
-      profile = Profile.objects.get(pk=self.kwargs['pk'])
+      profile = Profile.objects.get(user=self.request.user)
       return profile.get_post_feed()
 
   def get_context_data(self, **kwargs):
       """ """
       context = super().get_context_data(**kwargs)
-      context['profile'] = Profile.objects.get(pk=self.kwargs['pk'])
+      context['profile'] = Profile.objects.get(user=self.request.user)
       return context
   
-class SearchView(ListView):
+  def get_login_url(self):
+    """Return the URL for this app's login page"""
+    return reverse('login')
+  
+class SearchView(ListView, LoginRequiredMixin):
   template_name = "mini_insta/search_results.html"
   context_object_name = "posts"
 
   def dispatch(self, request, *args, **kwargs):
-      self.profile = Profile.objects.get(pk=self.kwargs['pk'])
+      self.profile = Profile.objects.get(user=self.request.user)
       self.query = request.GET.get('query')
 
       # If no query provided render normal search form
@@ -193,3 +217,11 @@ class SearchView(ListView):
       )
 
       return context
+  
+  def get_login_url(self):
+    """Return the URL for this app's login page"""
+    return reverse('login')
+
+class LogoutConfirmationView(TemplateView):
+    """ Redirect to display our logout page """
+    template_name = "mini_insta/logged_out.html"

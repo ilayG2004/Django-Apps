@@ -7,10 +7,12 @@
 
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Profile(models.Model):
   """ Defining fields of the Profile, corresponding to basic user data. These will be column in our table. """
+  user = models.ForeignKey(User, on_delete=models.CASCADE)
   display_name = models.TextField(blank=True)
   username = models.TextField(blank=True)
   profile_image_url = models.URLField(blank=True)
