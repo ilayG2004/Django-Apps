@@ -14,9 +14,14 @@ Description: Show list of following profiles of a profile instance
       <p> {{follower.username}} </p>
       <p> {{follower.display_name}} </p>
     </a>
-   
+    <div class="unfollow-btn">
+     <form method="POST" action="{% url 'unfollow' follower.pk%}">
+        {% csrf_token %}
+        <input type="submit" value="Unfollow">
+     </form>
     </div>
-     <hr/>
+  </div>
+  <hr/>
   {% endfor %}
-   </div>
+  </div>
 {% endblock %}

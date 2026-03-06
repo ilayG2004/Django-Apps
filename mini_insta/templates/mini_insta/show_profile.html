@@ -27,6 +27,17 @@ Changes 2/27: Added a form with a button input that takes user to the update pro
         </div>
       </div>
       <p class="bio">{{profile.bio_text}}</p>
+      {% if request.user.is_authenticated and request.user != profile.user and requester_profile not in profile.get_followers %}
+        <form action="{% url 'follow' profile.pk %}" method="POST">
+          {% csrf_token %}
+          <input type="submit" name="follow" value="Follow">
+        </form>
+      {% elif request.user.is_authenticated and request.user != profile.user and requester_profile in profile.get_followers %}
+        <form action="{% url 'unfollow' profile.pk %}" method="POST">
+          {% csrf_token %}
+          <input type="submit" name="unfollow" value="Unfollow">
+        </form>
+      {% endif %}
       {% if request.user.is_authenticated and request.user == profile.user %}
         <form action="{% url 'update_profile' %}" method="GET">
           <input type="submit" name="update" value="Update Profile">

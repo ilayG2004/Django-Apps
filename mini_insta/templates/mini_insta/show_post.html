@@ -22,6 +22,17 @@ Description: Display the post caption and timestamp, as well as all Photos assoc
           </div>
         {% endfor %}
       </div>
+      {% if request.user.is_authenticated and request.user != profile.user and not liked %}
+        <form method="POST" action="{% url 'like_post' post.pk%}">
+          {% csrf_token %}
+          <input type="submit" name="like" value="Like">
+        </form>
+      {% elif request.user.is_authenticated and request.user != profile.user and liked %}
+        <form method="POST" action="{% url 'unlike_post' post.pk%}">
+          {% csrf_token %}
+          <input type="submit" name="like" value="Unlike">
+        </form>
+      {% endif %}
       {% if post.get_likes.count > 0 %}
         <p><strong>Likes:</strong> {{post.get_likes.first.profile.username}} and {{post.get_likes.count|add:"-1"}} others</p>
       {% else %}
@@ -34,9 +45,11 @@ Description: Display the post caption and timestamp, as well as all Photos assoc
         <p style="font-size: 10px; margin-top: 0px;">{{comment.timestamp}}</p>
       {% endfor %}
     </div>
+    {% if request.user.is_authenticated and request.user == post.profile.user %}
     <div class="delete-update-post-container">
       <a href="{% url 'delete_post' post.pk %}">Delete Post</a>
       <a href="{% url 'update_post' post.pk %}">Update Post</a>
     </div>
+    {% endif %}
   </div>
 {% endblock %}

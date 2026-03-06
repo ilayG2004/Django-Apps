@@ -1,0 +1,24 @@
+<!--
+File: mini_insta/create_profile_form.html
+Author: Ilay Guler (ilay2004@bu.edu), 3/5/2026
+Description: Form to create a profile and user object
+-->
+{% extends "mini_insta/base.html" %}
+{% block content %}
+  <h2>Register for an account</h2>
+  <div>
+  <form method="POST" action="{% url 'register' %}">
+    {% csrf_token %}
+    <table>
+    {{form.as_table}}
+    </table>
+    {{user_creation_form.as_table}}
+    <input type="submit" name="submit" value="Submit">
+  </form>
+  <!--Return to the profile-->
+
+  <form method="GET"  action="{% url 'show_all_profiles' %}">
+    <input type="submit" name="Cancel" value="Cancel">
+  </form>
+  </div>
+{% endblock %}

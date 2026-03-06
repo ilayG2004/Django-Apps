@@ -28,9 +28,6 @@ Changes 2/19: Includes a footer with a link to create a post when under a user p
           <a href="{% url 'create_post' %}" class="footer-button">Create Post</a>
           <a href="{% url 'show_feed' %}" class="footer-button">Feed</a>
           <a href="{% url 'search' %}" class="footer-button">Search</a>
-        {% else %}
-          <p> User looking at this page, {{request.user}}, is not the user for this profile: {{profile.user}} </p>
-
         {% endif %}
       {% endif %}
       <a href="{% url 'show_all_profiles' %}" class="footer-button">Show All Profiles</a>

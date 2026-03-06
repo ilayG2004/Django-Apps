@@ -1,4 +1,9 @@
-<!--Allows users to login via the django auth views login view which provides for us a form and handles authentication -->
+<!--
+File: mini_insta/login.html
+Author: Ilay Guler (ilay2004@bu.edu), 3/5/2026
+Description: Allows users to login via the django auth views login view which provides for us a form and handles authentication
+-->
+
 {% extends 'mini_insta/base.html' %}
 {% block content %}
   <form method="POST" action="{% url 'login' %}">

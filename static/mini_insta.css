@@ -4,7 +4,7 @@
 # Description: Describes styling for the mini_insta app
 */
 body {
-  background-image: url("https://wallpapers.com/images/hd/genuine-windows-7-background-u8h8aey2tgg80bv4.jpg");
+  
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
@@ -16,7 +16,7 @@ p {
 .users-pane {
   margin-left: 15rem;
   margin-right: 8rem;
-  background-color: rgba(214, 235, 238, 0.5);
+  background-color: rgba(214, 222, 224, 0.5);
   border-radius: 5%;
   padding: 1rem;
 
@@ -58,7 +58,7 @@ p {
   flex-direction: column;
   align-items: center;
   padding: 0.75rem;
-  border: 1px solid aliceblue;
+  border: 1px solid rgb(0, 0, 0);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.2);
   text-align: center;
@@ -170,7 +170,7 @@ footer{
 }
 .footer-button {
   border-radius: 5px;
-  background-color: #6790bc;
+  background-color: #9da9b5;
   border-color: black;
   border-width: 2px;
   text-decoration: none;

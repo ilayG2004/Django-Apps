@@ -6,13 +6,17 @@
 # And CreatePostView which handles the GET of a create_post_form.html to load a HTML form and the creation of a new Post and Photo object when the form is submitted.\
 
 # Changes 2/27: Added the views for Followers, Following, Feed, Search
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .models import Profile, Post, Photo
 from .forms import *
 from django.urls import reverse
 from django.db.models import Q
+from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin 
+from django.contrib.auth.forms import UserCreationForm
+from django.http import HttpResponseNotFound
 
 
 
@@ -37,11 +41,25 @@ class ProfileDetailView(DetailView):
   template_name="mini_insta/show_profile.html"
   context_object_name="profile"
 
+  def get_context_data(self, **kwargs):
+     context = super().get_context_data(**kwargs)
+     if self.request.user.is_authenticated:
+        context['requester_profile'] = Profile.objects.get(user=self.request.user)
+     return context
+
 class PostDetailView(DetailView):
   """ Uses show_post.html with DetailView and the Post model to show a single post """
   model= Post
   template_name="mini_insta/show_post.html"
   context_object_name="post"
+
+  def get_context_data(self, **kwargs):
+     context = super().get_context_data(**kwargs)
+     print(kwargs.items)
+     if self.request.user.is_authenticated:
+      profile=Profile.objects.get(user=self.request.user)
+      context['liked'] = Like.objects.filter(profile=profile, post=self.object)
+     return context
 
 class CreatePostView(CreateView, LoginRequiredMixin):
   """ A view to create a Post for a Profile """
@@ -103,6 +121,32 @@ class UpdateProfileView(UpdateView, LoginRequiredMixin):
   def get_login_url(self):
      """Return the URL for this app's login page"""
      return reverse('login')
+  
+class CreateProfileView(CreateView):
+   model=Profile
+   form_class=CreateProfileForm
+   template_name="mini_insta/create_profile_form.html"
+
+   def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+    context['user_creation_form'] = UserCreationForm()
+    return context
+   
+   def form_valid(self, form):
+      """ Fetches the user creation form and saves the user object, which we then pass into the Profile instance """
+      user_form = UserCreationForm(self.request.POST)
+
+      if user_form.is_valid():
+          user = user_form.save()
+
+          login(self.request, user,
+                backend='django.contrib.auth.backends.ModelBackend')
+
+          form.instance.user = user
+          return super().form_valid(form)
+
+      return self.form_invalid(form)
+      
 
 class DeletePostView(DeleteView, LoginRequiredMixin):
   model=Post
@@ -225,3 +269,66 @@ class SearchView(ListView, LoginRequiredMixin):
 class LogoutConfirmationView(TemplateView):
     """ Redirect to display our logout page """
     template_name = "mini_insta/logged_out.html"
+
+
+class CreateLikeView(TemplateView):
+  """ Lets us save new likes to DB by getting the pk of the post and the requester profile """
+  model=Like
+   
+  def dispatch(self, request, *args, **kwargs):
+      liker_profile = Profile.objects.get(user=request.user)
+      post = Post.objects.get(pk=kwargs['pk'])
+      if Like.objects.filter(profile=liker_profile, post=post).exists():
+         return HttpResponseNotFound("<h1>Post already liked</h1>")
+      like_instance = Like(profile=liker_profile, post=post)
+      like_instance.save()
+      return redirect('show_post', pk=kwargs['pk'])
+
+class DeleteLikeView(TemplateView):
+  """ Lets us save delete likes on DB by getting the pk of the post and the requester profile """
+  model=Like
+
+  def dispatch(self, request, *args, **kwargs):
+     like_remover_profile = Profile.objects.get(user=request.user)
+     post = Post.objects.get(pk=kwargs['pk'])
+     if not Like.objects.filter(profile=like_remover_profile, post=post).exists():
+        return HttpResponseNotFound("<h1>Like object not found</h1>")
+     like_instance = Like.objects.get(profile=like_remover_profile,post=post)
+     like_instance.delete()
+     return redirect('show_post',pk=kwargs['pk'])
+
+class CreateFollowView(TemplateView):
+  model = Follow
+
+  def dispatch(self,request,*args,**kwargs):
+     """ Creates a follow instance between the user requesting and the profile they clicked to follow """
+     requester_profile = Profile.objects.get(user=request.user)
+     profile_to_follow = Profile.objects.get(pk=kwargs['pk'])
+     if Follow.objects.filter(profile=profile_to_follow, follower_profile=requester_profile).exists():
+        """ Additional backend logic to prevent following twice (even if the follow button is not there) """
+        return HttpResponseNotFound("<h1>Already follow this profile</h1>")
+     
+     if profile_to_follow != requester_profile:
+        """ Create the follow instance and return back to the profile we were viewing """
+        follow_instance = Follow(profile=profile_to_follow, follower_profile = requester_profile)
+        follow_instance.save()
+        return redirect('show_profile', pk=kwargs['pk'])
+     else:
+        return HttpResponseNotFound("<h1>No follow instance found between the request user's profile and the profile object selected.</h1>")
+  
+class DeleteFollowView(TemplateView):
+  model=Follow
+
+  def dispatch(self, request, *args, **kwargs):
+     """ Removes a follow instance in the DB by identifying the profiles references and then finding the follow object in the DB """
+     requester_profile = Profile.objects.get(user=self.request.user)
+     following_profile = Profile.objects.get(pk = kwargs['pk'])
+     follow_instance = Follow.objects.get(profile=following_profile, follower_profile=requester_profile)
+     if follow_instance:
+        follow_instance.delete()
+        if 'following' in request.path:
+          return redirect('show_following', pk=requester_profile.pk)
+        else:
+          return redirect('show_profile', pk=kwargs['pk'])
+     else:
+        return HttpResponseNotFound("<h1>No follow instance found between the request user's profile and the profile object selected.</h1>")
