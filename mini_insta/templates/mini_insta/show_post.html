@@ -46,10 +46,10 @@ Description: Display the post caption and timestamp, as well as all Photos assoc
       {% endfor %}
     </div>
     {% if request.user.is_authenticated and request.user == post.profile.user %}
-    <div class="delete-update-post-container">
-      <a href="{% url 'delete_post' post.pk %}">Delete Post</a>
-      <a href="{% url 'update_post' post.pk %}">Update Post</a>
-    </div>
+      <div class="delete-update-post-container">
+        <a href="{% url 'delete_post' post.pk %}">Delete Post</a>
+        <a href="{% url 'update_post' post.pk %}">Update Post</a>
+      </div>
     {% endif %}
   </div>
 {% endblock %}
