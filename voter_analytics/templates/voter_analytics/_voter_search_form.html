@@ -13,22 +13,34 @@
 
   <!-- Minimum Year of Birth -->
   <label for="min_year">Min Year of Birth:</label>
-  <select name="min_year" id="min_year">
-    <option value="">Any</option>
-    {% for year in years %}
-      <option value="{{ year }}">{{ year }}</option>
-    {% endfor %}
+  <select name="min_year">
+  <option value="">Any</option>
+  {% for year in years %}
+    <option value="{{ year }}"
+      {% if request.GET.min_year == year|stringformat:"s" %}
+        selected
+      {% endif %}
+    >
+      {{ year }}
+    </option>
+  {% endfor %}
   </select>
 
   <br><br>
 
   <!-- Maximum Year of Birth -->
   <label for="max_year">Max Year of Birth:</label>
-  <select name="max_year" id="max_year">
-    <option value="">Any</option>
-    {% for year in years %}
-      <option value="{{ year }}">{{ year }}</option>
-    {% endfor %}
+  <select name="max_year">
+  <option value="">Any</option>
+  {% for year in years %}
+    <option value="{{ year }}"
+      {% if request.GET.max_year == year|stringformat:"s" %}
+        selected
+      {% endif %}
+    >
+      {{ year }}
+    </option>
+  {% endfor %}
   </select>
 
   <br><br>
@@ -36,10 +48,20 @@
   <!-- Voter Score -->
   <label for="voter_score">Voter Score:</label>
   <select name="voter_score" id="voter_score">
-    <option value="">Any</option>
+
+    <!-- Default option -->
+    <option value="" {% if not request.GET.voter_score %}selected{% endif %}>
+      Any
+    </option>
+
+    <!-- Dynamic options -->
     {% for score in scores %}
-      <option value="{{ score }}">{{ score }}</option>
+      <option value="{{ score }}"
+        {% if request.GET.voter_score == score|stringformat:"s" %}selected{% endif %}>
+        {{ score }}
+      </option>
     {% endfor %}
+
   </select>
 
   <br><br>

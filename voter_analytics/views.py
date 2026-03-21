@@ -4,8 +4,9 @@
 
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from voter_analytics.models import *
+from django.db.models import Min, Max
 
 # Create your views here.
 def fake_view(request):
@@ -22,6 +23,18 @@ class ListVoters(ListView):
   template_name = "voter_analytics/voter_list.html"
   context_object_name = "voters"
   paginate_by = 100
+
+  def get_context_data(self, **kwargs):
+      context= super().get_context_data(**kwargs)
+      scores = [1, 2, 3, 4, 5]
+      result = Voter.objects.aggregate(oldest_dob=Min("dob"),newest_dob=Max("dob"))
+      oldest_year = result["oldest_dob"].year if result["oldest_dob"] else None
+      newest_year = result["newest_dob"].year if result["newest_dob"] else None
+
+      years = list(range(oldest_year,newest_year))
+      context["years"] = years
+      context["scores"] = scores
+      return context
 
   def get_queryset(self):
       queryset = super().get_queryset()
@@ -64,3 +77,7 @@ class ListVoters(ListView):
       return queryset
 
  
+class DetailVoter(DetailView):
+    model=Voter
+    template_name="voter_analytics/voter_detail.html"
+    context_object_name="voter"

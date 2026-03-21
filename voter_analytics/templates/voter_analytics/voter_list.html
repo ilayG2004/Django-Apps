@@ -13,12 +13,11 @@
     {% endif %}
     <table>
       <tr>
-        <th> First name </th> <th>Last name</th> <th>Street address </th> <th> DOB</th><th> Part</th><th> Voter score</th>
+        <th> Full name</th> <th>Street address </th> <th> DOB</th><th> Part</th><th> Voter score</th>
       </tr>
       {% for voter in voters %}
       <tr>
-        <td> {{voter.firstname}}</td>
-        <td> {{voter.lastname}} </td>
+        <td> <a href="{% url 'voter' voter.pk%}">{{voter.firstname}},{{voter.lastname}}</a> </td>
         <td> 
           {{voter.street_number}}, 
           {{voter.street_name}}, 
