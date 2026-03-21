@@ -1,4 +1,10 @@
-<form method="GET" action="{% url 'voters' %}">
+<!--
+# File: voter_analytics/templates/voter_analytics/_voter_search_form.html
+# Author: Ilay Guler (ilay2004@bu.edu), 3/20/2026
+# Description: Dynamically makes GET request to either our default listview or graph listview page to get queryset based on the parameters it attached on its GET request
+-->
+<form method="GET" action="{% if not visuals %} {% url 'voters' %} {% else %} {% url 'graphs' %}{% endif %}
+">
   
   <!-- Party Affiliation -->
   <label for="party">Party Affiliation:</label>

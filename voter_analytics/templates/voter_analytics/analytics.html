@@ -1,0 +1,20 @@
+<!--
+# File: voter_analytics/templates/voter_analytics/analytics.html
+# Author: Ilay Guler (ilay2004@bu.edu), 3/20/2026
+# Description: Loads div content of plotly graphs based on filtered querysets of voter instances
+-->
+
+{% extends 'voter_analytics/base.html' %}
+{% block content %}
+<h1>Visualizations</h1>
+{% include "voter_analytics/_voter_search_form.html" %}
+<h2>Birth Year Distribution</h2>
+{{ birth_year_graph|safe }}
+
+<h2>Party Affiliation</h2>
+{{ party_graph|safe }}
+
+<h2>Election Participation</h2>
+{{ election_graph|safe }}
+
+{% endblock %}

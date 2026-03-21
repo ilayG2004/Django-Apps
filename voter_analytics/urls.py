@@ -8,5 +8,6 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
   path('', ListVoters.as_view(), name="voters"),
-  path('voter/<int:pk>', DetailVoter.as_view(), name="voter")
+  path('voter/<int:pk>', DetailVoter.as_view(), name="voter"),
+  path('graphs/', GraphsView.as_view(), name="graphs"),
 ]

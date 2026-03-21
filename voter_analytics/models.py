@@ -6,6 +6,7 @@ from pathlib import Path
 
 # Create your models here.
 class Voter(models.Model):
+  """ Voter model reflecting all fields of row in csv data """
   lastname = models.TextField(blank=False)
   firstname = models.TextField(blank=False)
   street_number = models.IntegerField(blank=False)
@@ -26,6 +27,7 @@ class Voter(models.Model):
   voter_score = models.IntegerField()
 
 def load_data():
+  """ Loads voter data from CSV file. Skips the row entry if data is incorrectly formatted. (This can be improved upon later)"""
   app_dir = Path(__file__).resolve().parent
   file_path = app_dir / 'CS412-newton_voters.csv'
   filename = './CS412-newton_voter.csv'
