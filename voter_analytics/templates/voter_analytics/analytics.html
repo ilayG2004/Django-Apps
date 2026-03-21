@@ -7,6 +7,7 @@
 {% extends 'voter_analytics/base.html' %}
 {% block content %}
 <h1>Visualizations</h1>
+<a href="{% url 'voters' %}"><< Back</a>
 {% include "voter_analytics/_voter_search_form.html" %}
 <h2>Birth Year Distribution</h2>
 {{ birth_year_graph|safe }}
