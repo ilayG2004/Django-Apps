@@ -1,0 +1,12 @@
+{% extends 'dadjokes/base.html' %}
+{% block content %}
+  {% if not is_picture %}
+    <h1>Joke:</h1>
+    <p>{{item.joke}}</p>
+    <footer><a href="{% url 'joke_list' %}">Back to joke list</a></footer>
+  {% else %}
+    <h1>Picture:</h1>
+    <img src="{{item.image_url}}" style="width: 10rem; height: 10rem;">
+    <footer><a href="{% url 'pic_list' %}">Back to image list</a></footer>
+  {% endif %}
+{% endblock %}

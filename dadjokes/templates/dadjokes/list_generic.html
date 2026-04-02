@@ -1,0 +1,18 @@
+{% extends 'dadjokes/base.html' %}
+{% block content %}
+  {% if not is_picture %}
+    <h1>Joke List</h1>
+    {% for item in items %}
+      <a href="{% url 'joke_detail' item.pk %}"><p>{{item.joke}}</p></a>
+      <hr>
+    {% endfor %}
+  {% else %}
+    <h1>Picture List</h1>
+    {% for item in items %}
+      <a href="{% url 'pic_detail' item.pk %}">
+      <img src="{{item.image_url}}" style="width: 10rem; height: 10rem;">
+      </a>
+      <hr>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

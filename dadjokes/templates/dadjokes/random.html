@@ -1,0 +1,10 @@
+{% extends 'dadjokes/base.html' %}
+{% block content %}
+  <h1>Random Joke & Picture</h1>
+  {% if text %}
+    <p>{{text.joke}}</p>
+  {% endif %}
+  {% if pic %}
+    <img src="{{pic.image_url}}" style="width: 10rem; height: 10rem;">
+  {% endif %}
+{% endblock %}
