@@ -1,10 +1,19 @@
+# File: dadjokes/views.py
+# Author: Ilay Guler (ilay2004@bu.edu), 4/3/2026
+# Description: Handles returning generic views for the regular dadjokes webapp. Handles returning serialized data in JSON format
+# for REST API calls to our app.
+
 from django.shortcuts import render
 from rest_framework import generics
 from .serializers import *
 import random
 from django.views.generic import ListView, DetailView
 
+
 class RandomLookupMixin:
+  # Class which can be implemented into generic API views to change the way data is retreived. 
+  # Here, we redefine get object, to select a random index from our queryset, and return that instance
+  # Works on any defined model, as long as a valid query set is returned
   def get_object(self):
     qset = self.get_queryset()
     qset_len = len(qset)
@@ -12,32 +21,34 @@ class RandomLookupMixin:
     item = qset[rand_index]
     return item
 
-# Create your views here.
+# API Views
 class ListJokesAPI(generics.ListAPIView):
+  # List all jokes (10 at a time bc that's how i have it set in django settings) in json format
   queryset = Joke.objects.all()
   serializer_class = JokeSerializer
 
 class DetailJokeAPI(generics.RetrieveUpdateDestroyAPIView):
+  # Grabs a specific joke by primary key from the URL and returns in json format
   queryset= Joke.objects.all()
   serializer_class = JokeSerializer
 
 class RandomJokeAPI(RandomLookupMixin, generics.RetrieveAPIView):
+  # Applies the random lookup mixin to get a random joke and return in json format
   queryset = Joke.objects.all()
   serializer_class = JokeSerializer
 
 class ListPicturesAPI(generics.ListAPIView):
+  # List all pictures (10 at a time bc that's how i have it set in django settings) in json format
   queryset = Picture.objects.all()
   serializer_class = PictureSerializer
 
 class DetailPictureAPI(generics.RetrieveUpdateDestroyAPIView):
+  # Grabs a specific picture by primary key from the URL and returns in json format
   queryset= Picture.objects.all()
   serializer_class = PictureSerializer
 
 class RandomPictureAPI(RandomLookupMixin, generics.RetrieveAPIView):
-  """
-  Apply this mixin to any view or viewset to get multiple field filtering
-  based on a `lookup_fields` attribute, instead of the default single field filtering.
-  """
+  # Applies the random lookup mixin to get a random joke and return in json format
   queryset = Picture.objects.all()
   serializer_class = PictureSerializer
 
