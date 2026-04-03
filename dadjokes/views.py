@@ -22,7 +22,7 @@ class RandomLookupMixin:
     return item
 
 # API Views
-class ListJokesAPI(generics.ListAPIView):
+class ListJokesAPI(generics.ListCreateAPIView):
   # List all jokes (10 at a time bc that's how i have it set in django settings) in json format
   queryset = Joke.objects.all()
   serializer_class = JokeSerializer
