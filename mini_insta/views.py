@@ -17,8 +17,40 @@ from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponseNotFound
+from rest_framework import generics
+from .serializers import *
 
 
+
+# ---------- REST API VIEWS -------------
+class ReadProfilesAPI(generics.ListCreateAPIView):
+   """ Return a JSON list of serialized profiles """
+   queryset = Profile.objects.all()
+   serializer_class=ProfileSerializer
+
+class ReadProfileDetailAPI(generics.RetrieveAPIView): 
+   """ Get a JSON of an individual profile """
+   queryset = Profile.objects.all()
+   serializer_class = ProfileSerializer
+
+class ReadPostsAPI(generics.ListAPIView):
+    """ Gets the posts and photos for each post for this profile """
+    serializer_class = PostSerializer
+    def get_queryset(self):
+        # Default would be Post.objects.all() which would get all posts. 
+        # We want just the posts for this profile, so filter by the url's pk
+        qset = Post.objects.filter(profile=self.kwargs['pk'])
+        return qset
+
+class CreatePostAPI(generics.CreateAPIView):
+   """ Create a post via rest api POST request """
+   queryset = Post.objects.all()
+   serializer_class = PostSerializer
+
+class ReadFeedAPI(generics.RetrieveAPIView):
+   """ Call the feed serializer which essentially runs the get_feed_posts method from the Profile model, but serialized """
+   queryset=Profile.objects.all()
+   serializer_class = FeedSerializer
 
 # Create your views here.
 class ProfileListView(ListView):
@@ -27,6 +59,8 @@ class ProfileListView(ListView):
   template_name="mini_insta/show_all_profiles.html"
   context_object_name="profiles"
 
+
+# ---------- REGULAR DJANGO VIEWS -------------
 class MyProfileView(DetailView):
   model=Profile
   template_name="mini_insta/show_profile.html"
