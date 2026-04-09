@@ -12,26 +12,49 @@ from .models import Profile, Post, Photo
 from .forms import *
 from django.urls import reverse
 from django.db.models import Q
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponseNotFound
 from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .serializers import *
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 
+# ----- REST API LOGIN VIEWS -----
+class UserRegistrationAPIView(generics.CreateAPIView):
+   serializer_class = UserSerializer
+
+class UserLoginAPIView(APIView):
+   def post(self, request):
+      username = request.data.get('username')
+      password = request.data.get('password')
+      user = authenticate(username=username, password=password) # authenticate user to django db
+      if user is not None:
+         token, created = Token.objects.get_or_create(user=user)
+         return Response({'token': token.key}, status=status.HTTP_200_OK)
+      return Response({'error': 'invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
 # ---------- REST API VIEWS -------------
 class ReadProfilesAPI(generics.ListCreateAPIView):
    """ Return a JSON list of serialized profiles """
    queryset = Profile.objects.all()
    serializer_class=ProfileSerializer
+   permission_classes = [IsAuthenticatedOrReadOnly]
+   authentication_classes = [TokenAuthentication]
 
 class ReadProfileDetailAPI(generics.RetrieveAPIView): 
    """ Get a JSON of an individual profile """
    queryset = Profile.objects.all()
    serializer_class = ProfileSerializer
+   permission_classes = [IsAuthenticatedOrReadOnly]
+   authentication_classes = [TokenAuthentication]
 
 class ReadPostsAPI(generics.ListAPIView):
     """ Gets the posts and photos for each post for this profile """
@@ -41,16 +64,22 @@ class ReadPostsAPI(generics.ListAPIView):
         # We want just the posts for this profile, so filter by the url's pk
         qset = Post.objects.filter(profile=self.kwargs['pk'])
         return qset
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    authentication_classes = [TokenAuthentication]
 
 class CreatePostAPI(generics.CreateAPIView):
    """ Create a post via rest api POST request """
    queryset = Post.objects.all()
    serializer_class = PostSerializer
+   permission_classes = [IsAuthenticated]
+   authentication_classes = [TokenAuthentication]
 
 class ReadFeedAPI(generics.RetrieveAPIView):
    """ Call the feed serializer which essentially runs the get_feed_posts method from the Profile model, but serialized """
    queryset=Profile.objects.all()
    serializer_class = FeedSerializer
+   permission_classes = [IsAuthenticated]
+   authentication_classes = [TokenAuthentication]
 
 # ---------- REGULAR DJANGO VIEWS -------------
 class ProfileListView(ListView):

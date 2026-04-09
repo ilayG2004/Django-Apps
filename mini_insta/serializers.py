@@ -5,6 +5,7 @@
 
 from .models import *
 from rest_framework import serializers
+from django.contrib.auth.models import User
 
 class PostSerializer(serializers.ModelSerializer):
   # Serializes a joke instance and all of its fields
@@ -27,6 +28,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class FeedSerializer(serializers.ModelSerializer):
   # Serializes a picture instance and all of its fields
+
   feed_posts = serializers.SerializerMethodField()
   class Meta:
     model = Profile
@@ -73,3 +75,32 @@ class PhotoSerializer(serializers.ModelSerializer):
   class Meta: 
     model=Photo
     fields=['pk', 'post','image_url','timestamp','image_file']
+
+
+# ---- User Auth -----
+class UserSerializer(serializers.ModelSerializer):
+  password = serializers.CharField(write_only=True)
+  display_name = serializers.CharField(write_only=True, required=False, default='')
+  profile_image_url = serializers.URLField(write_only=True, required=False, default='')
+  bio_text = serializers.CharField(write_only=True, required=False, default='')
+  #password = serializers.CharField(write_only=True)
+  class Meta:
+    model=User
+    fields = ['username', 'password', 'email', 'display_name', 'profile_image_url', 'bio_text']
+  
+  def create(self, validated_data):
+    user = User.objects.create_user(
+      username = validated_data['username'],
+      password = validated_data['password'],
+      email = validated_data['email'],
+    )
+    
+    profile = Profile.objects.create(
+      user = user,
+      display_name = validated_data['display_name'],
+      username = validated_data['username'],
+      profile_image_url = validated_data['profile_image_url'],
+      bio_text = validated_data['bio_text'],
+    )
+    
+    return user
