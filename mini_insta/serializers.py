@@ -9,13 +9,19 @@ from rest_framework import serializers
 class PostSerializer(serializers.ModelSerializer):
   # Serializes a joke instance and all of its fields
   post_photos = serializers.SerializerMethodField()
+  username = serializers.SerializerMethodField()
   class Meta:
     model = Post
-    fields = ['pk', 'profile', 'timestamp', 'caption', 'post_photos']
+    fields = ['pk', 'profile', 'timestamp', 'caption', 'post_photos', 'username']
 
   def get_post_photos(self, obj):
     post_photos = obj.get_all_photos() 
     return PhotoSerializer(post_photos, many=True).data
+  
+  def get_username(self, obj):
+   # Fetch the full username based on the pk of the 'profile' field associated with a post
+   # Possibly redundant, but this avoids me making another API call on the RN app by the pk that 'profile' field returns. 
+   return UsernameSerializer(obj.profile).data
   
   
 
@@ -57,8 +63,13 @@ class ProfileMiniSerializer(serializers.ModelSerializer):
     model = Profile
     fields = ['pk', 'username', 'display_name']
 
+class UsernameSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Profile
+    fields = ['username']
+
 class PhotoSerializer(serializers.ModelSerializer):
   # Serializes a photo object and all of its fields
-  class Meta:
+  class Meta: 
     model=Photo
     fields=['pk', 'post','image_url','timestamp','image_file']
