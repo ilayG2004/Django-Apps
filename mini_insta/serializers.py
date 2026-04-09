@@ -11,10 +11,10 @@ class PostSerializer(serializers.ModelSerializer):
   post_photos = serializers.SerializerMethodField()
   class Meta:
     model = Post
-    fields = ['profile', 'timestamp', 'caption', 'post_photos']
+    fields = ['pk', 'profile', 'timestamp', 'caption', 'post_photos']
 
   def get_post_photos(self, obj):
-    post_photos = obj.get_all_photos()
+    post_photos = obj.get_all_photos() 
     return PhotoSerializer(post_photos, many=True).data
   
   
@@ -24,7 +24,7 @@ class FeedSerializer(serializers.ModelSerializer):
   feed_posts = serializers.SerializerMethodField()
   class Meta:
     model = Profile
-    fields = ['user', 'display_name', 'username', 'profile_image_url', 'bio_text', 'join_date', 'feed_posts']
+    fields = ['pk', 'user', 'display_name', 'username', 'profile_image_url', 'bio_text', 'join_date', 'feed_posts']
 
   # This should lowkey not be called every time we want a list of profiles or we will have an explosively large json
   def get_feed_posts(self, obj):
@@ -34,10 +34,10 @@ class FeedSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
   class Meta:
     model = Profile
-    fields = ['user', 'display_name', 'username', 'profile_image_url', 'bio_text', 'join_date']
+    fields = ['pk', 'user', 'display_name', 'username', 'profile_image_url', 'bio_text', 'join_date']
 
 
 class PhotoSerializer(serializers.ModelSerializer):
   class Meta:
     model=Photo
-    fields=['post','image_url','timestamp','image_file']
+    fields=['pk', 'post','image_url','timestamp','image_file']
