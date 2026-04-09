@@ -30,14 +30,35 @@ class FeedSerializer(serializers.ModelSerializer):
   def get_feed_posts(self, obj):
     posts = obj.get_post_feed()
     return PostSerializer(posts, many=True).data
-  
+
 class ProfileSerializer(serializers.ModelSerializer):
+  # Serializes a profile instance, all of its fields, and gets minimal data on its following and followers
+  followers = serializers.SerializerMethodField()
+  following = serializers.SerializerMethodField()
   class Meta:
     model = Profile
-    fields = ['pk', 'user', 'display_name', 'username', 'profile_image_url', 'bio_text', 'join_date']
+    fields = ['pk', 'user', 'display_name', 'username', 'profile_image_url', 'bio_text', 'join_date', 'followers', 'following']
 
+  def get_followers(self, obj):
+    followers = obj.get_followers()
+    # We use a minimal version of the profile serializer to avoid grabbing following-followers of a profile in a loop.
+    # What if two profile's follow each other? We would recursively keep grabbing their follow relations over and over --> mini profile serializer to avoid this
+    return ProfileMiniSerializer(followers, many=True).data
+  
+  def get_following(self, obj):
+    following = obj.get_following()
+    # We use a minimal version of the profile serializer to avoid grabbing following-followers of a profile in a loop.
+    # What if two profile's follow each other? We would recursively keep grabbing their follow relations over and over --> mini profile serializer to avoid this
+    return ProfileMiniSerializer(following, many=True).data
+
+class ProfileMiniSerializer(serializers.ModelSerializer):
+  # Serializes a few of the fields of a profile object
+  class Meta:
+    model = Profile
+    fields = ['pk', 'username', 'display_name']
 
 class PhotoSerializer(serializers.ModelSerializer):
+  # Serializes a photo object and all of its fields
   class Meta:
     model=Photo
     fields=['pk', 'post','image_url','timestamp','image_file']

@@ -52,15 +52,13 @@ class ReadFeedAPI(generics.RetrieveAPIView):
    queryset=Profile.objects.all()
    serializer_class = FeedSerializer
 
-# Create your views here.
+# ---------- REGULAR DJANGO VIEWS -------------
 class ProfileListView(ListView):
   """ Uses show_all_profiles.html with ListView and the Profile model to display all profiles """
   model=Profile
   template_name="mini_insta/show_all_profiles.html"
   context_object_name="profiles"
 
-
-# ---------- REGULAR DJANGO VIEWS -------------
 class MyProfileView(DetailView):
   model=Profile
   template_name="mini_insta/show_profile.html"
