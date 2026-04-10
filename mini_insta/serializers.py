@@ -104,3 +104,10 @@ class UserSerializer(serializers.ModelSerializer):
     )
     
     return user
+
+class MeSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ['id','user_id','username','display_name','bio_text','profile_image_url', 'join_date']

@@ -37,7 +37,7 @@ urlpatterns = [
 
 
   # REST APIs
-  #Reading a profile or a list of profiles.
+  # Reading a profile or a list of profiles.
   path('api/read_profiles/', ReadProfilesAPI.as_view()),
   path('api/read_feed/<int:pk>/', ReadFeedAPI.as_view()),
   path('api/read_profile/<int:pk>/', ReadProfileDetailAPI.as_view()),
@@ -45,4 +45,5 @@ urlpatterns = [
   path('api/create_post/', CreatePostAPI.as_view()),
   path('api/login/', UserLoginAPIView.as_view()),
   path('api/register/', UserRegistrationAPIView.as_view()),
+  path('api/me/', MeAPIView.as_view()),
 ]

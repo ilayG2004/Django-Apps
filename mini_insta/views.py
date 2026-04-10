@@ -29,9 +29,11 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 
 # ----- REST API LOGIN VIEWS -----
 class UserRegistrationAPIView(generics.CreateAPIView):
+   """ Creates a User and Profile associated with that user """
    serializer_class = UserSerializer
 
 class UserLoginAPIView(APIView):
+   """ Handles only POST requests that follow its path. """
    def post(self, request):
       username = request.data.get('username')
       password = request.data.get('password')
@@ -40,6 +42,16 @@ class UserLoginAPIView(APIView):
          token, created = Token.objects.get_or_create(user=user)
          return Response({'token': token.key}, status=status.HTTP_200_OK)
       return Response({'error': 'invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
+class MeAPIView(APIView):
+    """ Get the Profile model info of the User model logged in """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = Profile.objects.get(user=request.user)
+
+        serializer = MeSerializer(profile)
+        return Response(serializer.data)
 
 # ---------- REST API VIEWS -------------
 class ReadProfilesAPI(generics.ListCreateAPIView):
