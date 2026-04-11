@@ -4,6 +4,8 @@
 
 # Changes 2/19: Added create_post path which uses the CreatePostView CreateView generic. And show_post which uses the PostDetailView DetailView generic
 # Changes 2/27: Added URLs for Following, Followers, Delete, Update, Search
+
+# Changes 4/10: Added routes for RESTful API views
 from django.urls import path
 from .views import *
 from django.contrib.auth import views as auth_views
@@ -39,8 +41,9 @@ urlpatterns = [
   # REST APIs
   # Reading a profile or a list of profiles.
   path('api/read_profiles/', ReadProfilesAPI.as_view()),
-  path('api/read_feed/<int:pk>/', ReadFeedAPI.as_view()),
+  path('api/read_feed/', ReadFeedAPI.as_view()),
   path('api/read_profile/<int:pk>/', ReadProfileDetailAPI.as_view()),
+  path('api/my_profile/', MyProfileAPI.as_view()),
   path('api/read_posts/<int:pk>/', ReadPostsAPI.as_view()),
   path('api/create_post/', CreatePostAPI.as_view()),
   path('api/login/', UserLoginAPIView.as_view()),

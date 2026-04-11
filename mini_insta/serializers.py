@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 class PostSerializer(serializers.ModelSerializer):
   # Serializes a joke instance and all of its fields
   post_photos = serializers.SerializerMethodField()
-  username = serializers.SerializerMethodField()
+  username = serializers.CharField(source="profile.user.username", read_only=True)
   class Meta:
     model = Post
     fields = ['pk', 'profile', 'timestamp', 'caption', 'post_photos', 'username']
@@ -19,15 +19,10 @@ class PostSerializer(serializers.ModelSerializer):
     post_photos = obj.get_all_photos() 
     return PhotoSerializer(post_photos, many=True).data
   
-  def get_username(self, obj):
-   # Fetch the full username based on the pk of the 'profile' field associated with a post
-   # Possibly redundant, but this avoids me making another API call on the RN app by the pk that 'profile' field returns. 
-   return UsernameSerializer(obj.profile).data
-  
   
 
 class FeedSerializer(serializers.ModelSerializer):
-  # Serializes a picture instance and all of its fields
+  # Serializes every post in a user's following
 
   feed_posts = serializers.SerializerMethodField()
   class Meta:
@@ -65,11 +60,6 @@ class ProfileMiniSerializer(serializers.ModelSerializer):
     model = Profile
     fields = ['pk', 'username', 'display_name']
 
-class UsernameSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = Profile
-    fields = ['username']
-
 class PhotoSerializer(serializers.ModelSerializer):
   # Serializes a photo object and all of its fields
   class Meta: 
@@ -83,7 +73,6 @@ class UserSerializer(serializers.ModelSerializer):
   display_name = serializers.CharField(write_only=True, required=False, default='')
   profile_image_url = serializers.URLField(write_only=True, required=False, default='')
   bio_text = serializers.CharField(write_only=True, required=False, default='')
-  #password = serializers.CharField(write_only=True)
   class Meta:
     model=User
     fields = ['username', 'password', 'email', 'display_name', 'profile_image_url', 'bio_text']
@@ -106,6 +95,7 @@ class UserSerializer(serializers.ModelSerializer):
     return user
 
 class MeSerializer(serializers.ModelSerializer):
+    # Detail view of the logged-in user
     user_id = serializers.IntegerField(source='user.id', read_only=True)
 
     class Meta:

@@ -6,6 +6,8 @@
 # And CreatePostView which handles the GET of a create_post_form.html to load a HTML form and the creation of a new Post and Photo object when the form is submitted.\
 
 # Changes 2/27: Added the views for Followers, Following, Feed, Search
+
+# Changes 4/10: Added REST API urls for object retreival and user auth - ableit slightly more limited than the full webapp.
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .models import Profile, Post, Photo
@@ -68,6 +70,14 @@ class ReadProfileDetailAPI(generics.RetrieveAPIView):
    permission_classes = [IsAuthenticatedOrReadOnly]
    authentication_classes = [TokenAuthentication]
 
+class MyProfileAPI(generics.RetrieveAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        pf = Profile.objects.get(user=self.request.user)
+        return pf
+
 class ReadPostsAPI(generics.ListAPIView):
     """ Gets the posts and photos for each post for this profile """
     serializer_class = PostSerializer
@@ -87,11 +97,12 @@ class CreatePostAPI(generics.CreateAPIView):
    authentication_classes = [TokenAuthentication]
 
 class ReadFeedAPI(generics.RetrieveAPIView):
-   """ Call the feed serializer which essentially runs the get_feed_posts method from the Profile model, but serialized """
-   queryset=Profile.objects.all()
-   serializer_class = FeedSerializer
-   permission_classes = [IsAuthenticated]
-   authentication_classes = [TokenAuthentication]
+    serializer_class = FeedSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get_object(self):
+        return Profile.objects.get(user=self.request.user)
 
 # ---------- REGULAR DJANGO VIEWS -------------
 class ProfileListView(ListView):
