@@ -96,6 +96,9 @@ class CreatePostAPI(generics.CreateAPIView):
    permission_classes = [IsAuthenticated]
    authentication_classes = [TokenAuthentication]
 
+   def get_object(self):
+        return Profile.objects.get(user=self.request.user)
+
 class ReadFeedAPI(generics.RetrieveAPIView):
     serializer_class = FeedSerializer
     permission_classes = [IsAuthenticated]

@@ -1,0 +1,26 @@
+<!--
+FILE: SundayLeague/league_list.html
+AUTHOR: Ilay Guler (ilay2004@bu.edu)
+DESCRIPTION: Shows leagues about to start & active leagues. Click on a card to see more detail.
+DATE: 4/17/2026
+-->
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2>Leagues Starting Soon</h2>
+  {% for league in leagues %}
+    <div class="card">
+      <p class="league-title">{{league.league_name}}</p>
+      <p class="type-text">Sport: {{league.sport_type}}</p>
+      <p class="seriousness">Level: {{league.level}}</p>
+      <p class="dates">{{league.season_start}} - {{league.season_end}}</p>
+    </div>
+    
+  {% endfor %}
+  <div class="my-stuff">
+    <a>Profile</a>
+    <a>My Leagues</a>
+    <a>My Teams</a>
+    <a>My Games</a>
+  </div>
+{% endblock %}
