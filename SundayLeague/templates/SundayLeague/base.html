@@ -4,14 +4,24 @@ AUTHOR: Ilay Guler (ilay2004@bu.edu)
 DESCRIPTION: Boilerplate html for app
 DATE: 4/17/2026
 -->
+{% load static %}
 <!DOCTYPE html>
 <html>
   <head>
     <title>Terrier Sunday League</title>
+    <link rel="stylesheet" href="{% static 'sundayleague.css' %}">
   </head>
   <html>
     <h1>Terrier Sunday League</h1>
     <h4> Play hard, have fun. </h4>
+     <div class="my-stuff">
+      <a>Profile</a>
+      <a>My Leagues</a>
+      <a>My Teams</a>
+      <a>My Games</a>
+      <a>Discover Leagues</a>
+      <a>Join teams</a>
+    </div>
     <hr>
     {% block content %}
     {% endblock %}

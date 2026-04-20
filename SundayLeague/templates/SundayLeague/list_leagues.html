@@ -9,18 +9,13 @@ DATE: 4/17/2026
 {% block content %}
   <h2>Leagues Starting Soon</h2>
   {% for league in leagues %}
+    <a href="{% url 'detail_league' league.pk %}">
     <div class="card">
       <p class="league-title">{{league.league_name}}</p>
       <p class="type-text">Sport: {{league.sport_type}}</p>
       <p class="seriousness">Level: {{league.level}}</p>
       <p class="dates">{{league.season_start}} - {{league.season_end}}</p>
     </div>
-    
   {% endfor %}
-  <div class="my-stuff">
-    <a>Profile</a>
-    <a>My Leagues</a>
-    <a>My Teams</a>
-    <a>My Games</a>
-  </div>
+ 
 {% endblock %}

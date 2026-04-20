@@ -1,0 +1,51 @@
+<!--
+FILE: SundayLeague/detail_team.html
+AUTHOR: Ilay Guler (ilay2004@bu.edu)
+DESCRIPTION: Shows details about a team.
+DATE: 4/18/2026
+-->
+{% extends 'SundayLeague/base.html' %}
+{% block content %}
+  <!--Basic team details-->
+  {% if team %}
+    
+      <h2>{{team.name}}</h2>
+      
+    <div class="game-card-header">
+      {% if team.picture %}
+        <img src="{{team.getImageUrl}}" class="team-banner">
+      {% else %}
+        <p>No picture found. Generate placeholder</p>
+      {% endif %}
+      <h3>{{team.league}}</h3>
+    </div>
+  {% endif %}
+
+  <!--Win-Loss record-->
+  <div class="game-card-header">
+  <h2>Record</h2>
+  {% if record %}
+    <p class="bold">Wins: {{record.wins}} | Losses: {{record.losses}} </p>
+  {% endif %}
+  </div>
+
+  <!--List of memember-->
+  <h2>Members</h2>
+  {% for member in members %}
+    <a href="{% url 'detail_profile' member.pk %}">
+    <div class="card">
+      <div class="game-card-header">
+     
+      {% if member.getProfile %}
+        <img src="{{member.getProfile.getImageUrl}}" class="user-pfp">
+      {% endif %}
+      <p>{{member.user.first_name}}</p>
+      {% if member.getProfile %}
+        <p>{{member.getProfile.bio}}</p>
+      {% endif %}
+      
+      </div>
+    </div>
+    </a>
+  {% endfor %}
+{% endblock %}

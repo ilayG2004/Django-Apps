@@ -1,0 +1,98 @@
+<!--
+FILE: SundayLeague/league_detail.html
+AUTHOR: Ilay Guler (ilay2004@bu.edu)
+DESCRIPTION: Shows a specific sport league, the teams signed up, and a description. An invidiual user can request to join a team, or a registered Team can request to join a league.
+DATE: 4/17/2026
+-->
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <div class="two-container">
+    <div class="two-thirds">
+      <h2>Upcoming Games</h2>
+        <!--Upcoming games-->
+        {% if games %}
+          {% for game in games %}
+            <div class="card">
+              <div class="game-card-header">
+                <p class="team-title">{{ game.team1.name }} vs. </p>
+                <p class="team-title">   {{ game.team2.name }}</p>
+              </div>
+              <p class="dates">{{ game.time }}</p>
+              {% if game.winner %}
+                <p><strong>Winner: </strong>{{ game.winner.name }}</p>
+              {% endif %}
+              {% if game.final_score %}
+                <p> Final Score: {{ game.final_score }}</p>
+              {% else %}
+                <p>Final Score: TBD</p>
+              {% endif %}
+              <p>{{ game.location }}</p>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No games scheduled.</p>
+        {% endif %}
+    </div>
+    <div class="one-third">
+      <h2>Leaderboard</h2>
+      {% if leaderboard %}
+        <table>
+          <tr>
+            <th>Team</th>
+            <th>Wins</th>
+            <th>Losses</th>
+          </tr>
+          <!-- Build leaderboard based on team's win & loss frequency tables -->
+          {% for row in leaderboard %}
+            <tr>
+                <td><a href="{% url 'detail_team' row.pk %}">{{ row.team }}</a></td>
+                <td>{{ row.wins }}</td>
+                <td>{{ row.losses }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+    </div>
+  </div>
+  
+
+  <h2>Teams</h2>
+  <!--Cards of teams-->
+  {% if teams %}
+    {% for team in teams %}
+      <div class="card">
+        <a href="{% url 'detail_team' team.pk %}">
+          <div class="game-card-header">
+            {% if team.picture %}
+              <img src="{{team.getImageUrl}}" class="team-pfp">
+            {% endif %}
+            <p class="league-title">{{ team.name }}</p>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No teams.</p>
+  {% endif %}
+
+  
+
+  <h2>Feed</h2>
+  {% if posts %}
+    <!-- Iterate thru posts & attach images if available-->
+    {% for post in posts %}
+      <div class="post">
+        
+        <a class="post-header" href="{% url 'detail_profile' post.posting_user.slprofile.pk %}">{{post.posting_user}}</a>
+        <hr>
+        {% if post.image %}
+          <img src="{{post.getImageUrl}}" class="post-image">
+        {% endif %}
+        <p class="post-message">{{post.message}}</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No posts yet! Post game highlights, team-bonding moments, or messages to connect with your community!</p>
+  {% endif %}
+{% endblock %}

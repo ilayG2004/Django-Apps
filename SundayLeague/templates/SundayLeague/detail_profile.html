@@ -1,0 +1,29 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  {% if profile %} 
+    <h2>{{profile.user.first_name}}</h2>
+    <h3>{{profile.user.username}}</h3>
+    <img src="{{profile.getImageUrl}}">
+  {% endif %}
+
+  <!--History of participated teams-->
+  <h2>Team History</h2>
+  {% if teams|length > 0 %}
+    <table>
+      <tr>
+        <th>Team</th>
+      </tr>
+      {% for team in teams %}
+        <p>{{team.name}}</p>
+        <img src="{{team.getImageUrl}}">
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  <h2>Upvotes</h2>
+  {% if upvotes|length > 0 %}
+    <!--Fix upvotes table later-->
+    <p>{{upvotes|length}}</p>
+  {% endif %}
+{% endblock %}
