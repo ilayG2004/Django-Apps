@@ -1,0 +1,30 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2>Discover Teams</h2>
+  <h3>Teams looking for new members.</h3>
+  <form method="GET">
+    <label>Sport:</label>
+    <input type="text" name="sport" placeholder="e.g. Volleyball" value="{% if request.GET.sport %}{{ request.GET.sport }}{% endif %}">
+
+    <label>Level:</label>
+    <input type="text" name="level" placeholder="e.g. Beginner" value="{% if request.GET.sport %}{{ request.GET.level }}{% endif %}">
+
+    <label>Start After:</label>
+    <input type="date" name="start_date" value="{% if request.GET.sport %}{{ request.GET.start_date }}{% endif %}">
+
+    <button type="submit">Filter</button>
+    <a href="{% url 'list_teams' %}">Reset</a>
+  </form>
+  {% for team in teams %}
+  <div class="card">
+      <div class="game-card-header">
+        <img src="{{team.getImageUrl}}" class="team-pfp">
+        <p class="league-title">{{team.name}}</p>
+      </div>
+      <p class="type-text">Sport: {{team.league.sport_type}}</p>
+      <p class="seriousness">Level: {{team.league.level}}</p>
+      <p class="dates">{{team.league.season_start}} - {{team.league.season_end}}</p>
+  </div>
+  {% endfor %}
+{% endblock %}

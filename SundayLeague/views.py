@@ -7,6 +7,12 @@ DATE: 4/17/2026
 from django.shortcuts import render
 from django.views.generic import *
 from .models import *
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
+from django.db.models import Q
+from django.urls import reverse
+from django.contrib.auth.views import LogoutView
+from django.urls import reverse_lazy
 # Create your views here.
 class ListLeagues(ListView):
   model=League
@@ -82,6 +88,105 @@ class ProfileDetail(DetailView):
     context = super().get_context_data(**kwargs)
     profile = self.object
     context['profile'] = profile
-    context["upvotes"] = profile.getUpvotes()
+    upvotes = profile.getUpvotes()
+    aggregate = {}
+    for upvote in upvotes:
+      if upvote.vote_type not in aggregate:
+        aggregate[upvote.vote_type] = 1
+      else:
+        aggregate[upvote.vote_type] += 1
+    context["upvotes"] = aggregate
     context["teams"] = profile.getTeams()
     return context
+  
+class ListTeams(ListView):
+  model=Team
+  template_name='SundayLeague/list_teams.html'
+  context_object_name='teams'
+
+  def get_queryset(self):
+        queryset = super().get_queryset()
+
+        sport = self.request.GET.get('sport')
+        level = self.request.GET.get('level')
+        start_date = self.request.GET.get('start_date')
+
+        if sport:
+            queryset = queryset.filter(league__sport_type__icontains=sport)
+
+        if level:
+            queryset = queryset.filter(league__level__icontains=level)
+
+        if start_date:
+            queryset = queryset.filter(league__season_start__gte=start_date)
+
+        return queryset
+  
+class MyTeams(LoginRequiredMixin, ListView):
+  login_url = 'login/'
+  redirect_field_name = 'redirect_to'
+  
+  model = Team
+  template_name = 'SundayLeague/my_teams.html'
+  context_object_name = 'teams'
+
+  def get_queryset(self):
+      profile = SLProfile.objects.get(user=self.request.user)
+      return profile.getTeams()
+  
+class MyLeagues(LoginRequiredMixin, ListView):
+  login_url = 'login/'
+  redirect_field_name = 'redirect_to'
+  
+  model = League
+  template_name = 'SundayLeague/my_teams.html'
+  context_object_name = 'teams'
+
+  def get_queryset(self):
+    profile = SLProfile.objects.get(user=self.request.user)
+    teams = profile.getTeams()
+    leagues = League.objects.filter(team__in=teams).distinct()
+    return leagues
+    
+    
+class MyGames(LoginRequiredMixin, ListView):
+    login_url = 'login/'
+    redirect_field_name = 'redirect_to'
+    
+    model = Game
+    template_name = 'SundayLeague/my_games.html'
+    context_object_name = 'games'
+
+    def get_queryset(self):
+        profile = SLProfile.objects.get(user=self.request.user)
+
+        # Get user's teams (as queryset ideally)
+        teams = profile.getTeams()
+
+        # Get all upcoming games involving those teams
+        return Game.objects.filter(
+            (Q(team1__in=teams) | Q(team2__in=teams)) &
+            Q(winner=None)
+        ).order_by('time')
+    
+
+class CustomLoginView(LoginView):
+    template_name = 'SundayLeague/login.html'
+
+    def get_success_url(self):
+        # If ?next= exists, respect it (important!)
+        next_url = self.request.GET.get('next')
+        if next_url:
+            return next_url
+
+        # Otherwise redirect to user's profile
+        profile = self.request.user.slprofile
+        return reverse('detail_profile', kwargs={'pk': profile.pk})
+    
+class CustomLogoutView(LogoutView):
+  def get_success_url(self):
+    # If ?next= exists, respect it (important!)
+    next_url = self.request.GET.get('next')
+    if next_url:
+        return next_url 
+    return reverse('list_leagues')

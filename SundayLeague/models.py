@@ -8,7 +8,7 @@ DATE: 4/17/2026
 from django.db import models
 from django.contrib.auth.models import User
 import datetime
-
+from django.db.models import Q
 class SLProfile(models.Model):
   # Customizable athelte profile attached to an authenticated User. Ideally I would have overriden regular User auth with an abstract user, but I did not want to
   # mess with the other apps in this project which user regular user auth.
@@ -23,6 +23,7 @@ class SLProfile(models.Model):
       return ''
     
   def getTeams(self):
+    """ All teams a user-profile is a part of """
     memberships = TeamMember.objects.filter(user=self.user)
     teams = []
     for membership in memberships:
@@ -59,6 +60,7 @@ class League(models.Model):
     return teams
   
   def getLeaderboard(self):
+    # Checks game objects associated with this team, and whether or not they were declared winner (if there was a winner)
     teams = self.getTeams()
     wins = {}
     losses = {}
@@ -115,11 +117,12 @@ class Team(models.Model):
   league = models.ForeignKey(League, on_delete=models.CASCADE)
   picture = models.ImageField(default=None, blank=True, null=True)
 
-  def __str__(self):
+  def __str__(self):  
     """ Stringified representation of a model instance """
     return 'Team:' +self.name + ' | ' + str(self.pk)
   
   def getTeamMembers(self):
+    # Get members of a team
     members = TeamMember.objects.filter(team=self)
     return members
   
@@ -128,6 +131,11 @@ class Team(models.Model):
       return self.picture.url
     else:
       return ''
+  
+  def getGames(self):
+    """ Get all games in a league ordered by upcoming first """
+    games = Game.objects.filter((Q(team1=self) | Q(team2=self)) & Q(winner=None)).order_by('time')
+    return games
     
   def getWinLosses(self):
     """ Returns dictionary of {team: str, wins: int, losses: int}"""

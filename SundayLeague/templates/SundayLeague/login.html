@@ -1,0 +1,22 @@
+{% extends 'SundayLeague/base.html' %}
+{% block content %}
+<h2>Login</h2>
+
+<form method="POST">
+  {% csrf_token %}
+  
+  <label>Username:</label>
+  <input type="text" name="username" required>
+
+  <label>Password:</label>
+  <input type="password" name="password" required>
+
+  <button type="submit">Login</button>
+
+  {% if form.errors %}
+    <p style="color:red;">Invalid username or password</p>
+  {% endif %}
+
+  <input type="hidden" name="next" value="{{ next }}">
+</form>
+{% endblock %}

@@ -12,15 +12,24 @@ DATE: 4/17/2026
     <link rel="stylesheet" href="{% static 'sundayleague.css' %}">
   </head>
   <html>
+    {% if user.is_authenticated %}
+      <p>Welcome, {{ user.username }}</p>
+      <a href="{% url 'logout' %}">Logout</a>
+    {% else %}
+      <a href="{% url 'login' %}">Login</a>
+    {% endif %}
     <h1>Terrier Sunday League</h1>
     <h4> Play hard, have fun. </h4>
      <div class="my-stuff">
-      <a>Profile</a>
-      <a>My Leagues</a>
-      <a>My Teams</a>
-      <a>My Games</a>
-      <a>Discover Leagues</a>
-      <a>Join teams</a>
+      {% if user %}
+        <a href="{% url 'detail_profile' user.slprofile.pk %}">Profile</a>
+        <!--
+        <a href="{% url 'my_leagues' %}">My Leagues</a>
+        <a href="{% url 'my_teams' %}">My Teams</a>
+        <a href="{% url 'my_games' %}">My Games</a>-->
+       {% endif %}
+      <a href="{% url 'list_leagues' %}">Discover Leagues</a>
+      <a href="{% url 'list_teams' %}">Join teams</a>
     </div>
     <hr>
     {% block content %}

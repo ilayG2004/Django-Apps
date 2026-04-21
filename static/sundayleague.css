@@ -244,6 +244,11 @@ th, td {
   padding: 10px;
 }
 
+.team-table{
+  margin: 2rem;
+  width: auto;
+}
+
 /* Post stuff */
 
 .post{
@@ -291,4 +296,9 @@ a:link{
 }
 a:visited{
   color: var(--text-secondary-bright);
+}
+
+.profile-info-container{
+  margin:2rem;
+  justify-content: center;
 }
