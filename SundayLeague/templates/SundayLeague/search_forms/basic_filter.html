@@ -1,0 +1,27 @@
+<!--
+AUTHOR: Ilay Guler (ilay2004@bu.edu)
+DESCRIPTION: Form for overriding get queryset in most views. Uses a context variable which decides which filters are to be applied. 
+DATE: 4/21/2026
+
+-->
+{% block content %}
+  <form method="GET">
+    <label>Sport:</label>
+    <input type="text" name="sport" placeholder="e.g. Volleyball" value="{% if request.GET.sport %}{{ request.GET.sport }}{% endif %}">
+
+    <label>Level:</label>
+    <input type="text" name="level" placeholder="e.g. Beginner" value="{% if request.GET.level %}{{ request.GET.level }}{% endif %}">
+    
+    <label>Start Date:</label>
+    <input type="date" name="start_date" value="{% if request.GET.start_date %}{{ request.GET.start_date }}{% endif %}">
+
+    <label>End Date:</label>
+    <input type="date" name="end_date" value="{% if request.GET.end_date %}{{ request.GET.end_date }}{% endif %}">
+
+    <label>Name:</label>
+    <input type="text" name="name" value="{% if request.GET.name %}{{ request.GET.name }}{% endif %}">
+
+    <button type="submit">Filter</button>
+    <a href="{{ request.path }}">Reset</a>
+  </form>
+{% endblock %}

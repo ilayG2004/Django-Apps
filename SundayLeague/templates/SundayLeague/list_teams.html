@@ -3,19 +3,7 @@
 {% block content %}
   <h2>Discover Teams</h2>
   <h3>Teams looking for new members.</h3>
-  <form method="GET">
-    <label>Sport:</label>
-    <input type="text" name="sport" placeholder="e.g. Volleyball" value="{% if request.GET.sport %}{{ request.GET.sport }}{% endif %}">
-
-    <label>Level:</label>
-    <input type="text" name="level" placeholder="e.g. Beginner" value="{% if request.GET.sport %}{{ request.GET.level }}{% endif %}">
-
-    <label>Start After:</label>
-    <input type="date" name="start_date" value="{% if request.GET.sport %}{{ request.GET.start_date }}{% endif %}">
-
-    <button type="submit">Filter</button>
-    <a href="{% url 'list_teams' %}">Reset</a>
-  </form>
+  {% include 'SundayLeague/search_forms/basic_filter.html' %}
   {% for team in teams %}
   <div class="card">
       <div class="game-card-header">

@@ -24,11 +24,7 @@ class SLProfile(models.Model):
     
   def getTeams(self):
     """ All teams a user-profile is a part of """
-    memberships = TeamMember.objects.filter(user=self.user)
-    teams = []
-    for membership in memberships:
-      teams.append(membership.team)
-    return teams
+    return Team.objects.filter(teammember__user=self.user)
   
   def getUpvotes(self):
     """ Lets us gather the upvotes for a teammember """

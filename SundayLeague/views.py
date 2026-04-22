@@ -13,13 +13,42 @@ from django.db.models import Q
 from django.urls import reverse
 from django.contrib.auth.views import LogoutView
 from django.urls import reverse_lazy
+from django.http import HttpResponseBadRequest
+from django.utils import timezone
 # Create your views here.
 class ListLeagues(ListView):
+  """ View to list active leagues """
   model=League
   template_name='SundayLeague/list_leagues.html'
   context_object_name='leagues'
 
+  def get_queryset(self):
+    queryset = super().get_queryset()
+
+    sport = self.request.GET.get('sport')
+    level = self.request.GET.get('level')
+    start_date = self.request.GET.get('start_date')
+    end_date = self.request.GET.get('end_date')
+    league_name = self.request.GET.get('name')
+
+    if sport:
+      queryset = queryset.filter(sport_type__icontains=sport)
+
+    if level:
+      queryset = queryset.filter(level__icontains=level)
+
+    if start_date:
+      queryset = queryset.filter(season_start__gte=start_date)
+    
+    if end_date:
+      queryset = queryset.filter(season_end__lte=end_date)
+
+    if league_name:
+      queryset = queryset.filter(league_name__icontains=league_name)
+    return queryset
+
 class DetailLeague(DetailView):
+  """ View to display league details """
   model=League
   template_name='SundayLeague/detail_league.html'
   context_object_name='league'
@@ -43,6 +72,7 @@ class DetailLeague(DetailView):
     return context
 
 class TeamDetail(DetailView):
+  """ View to display a team's detailed page """
   model=Team
   template_name='SundayLeague/detail_team.html'
   context_object_name='team'
@@ -76,6 +106,7 @@ class GameDetail(DetailView):
   """
 
 class ProfileDetail(DetailView):
+  """ View to list a profile """
   model=SLProfile
   template_name='SundayLeague/detail_profile.html'
   content_object_name='profile'
@@ -100,6 +131,7 @@ class ProfileDetail(DetailView):
     return context
   
 class ListTeams(ListView):
+  """ View to list all active teams """
   model=Team
   template_name='SundayLeague/list_teams.html'
   context_object_name='teams'
@@ -110,51 +142,123 @@ class ListTeams(ListView):
         sport = self.request.GET.get('sport')
         level = self.request.GET.get('level')
         start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        team_name = self.request.GET.get('name')
 
         if sport:
-            queryset = queryset.filter(league__sport_type__icontains=sport)
+          queryset = queryset.filter(league__sport_type__icontains=sport)
 
         if level:
-            queryset = queryset.filter(league__level__icontains=level)
+          queryset = queryset.filter(league__level__icontains=level)
 
         if start_date:
-            queryset = queryset.filter(league__season_start__gte=start_date)
+          queryset = queryset.filter(league__season_start__gte=start_date)
+        
+        if end_date:
+          queryset = queryset.filter(league__season_end__lte=end_date)
 
+        if team_name:
+          queryset = queryset.filter(name__icontains=team_name)
         return queryset
   
+
+"""---------- Log-in User Tabs -----------------"""
+  
 class MyTeams(LoginRequiredMixin, ListView):
+  """ View to display teams for a user """
   login_url = 'login/'
   redirect_field_name = 'redirect_to'
   
   model = Team
-  template_name = 'SundayLeague/my_teams.html'
+  template_name = 'SundayLeague/my_pages/my_teams.html'
   context_object_name = 'teams'
 
   def get_queryset(self):
       profile = SLProfile.objects.get(user=self.request.user)
-      return profile.getTeams()
+      queryset = profile.getTeams()
+
+      sport = self.request.GET.get('sport')
+      level = self.request.GET.get('level')
+      start_date = self.request.GET.get('start_date')
+      end_date = self.request.GET.get('end_date')
+      team_name = self.request.GET.get('name')
+
+      if sport:
+        queryset = queryset.filter(league__sport_type__icontains=sport)
+
+      if level:
+        queryset = queryset.filter(league__level__icontains=level)
+
+      if start_date:
+        queryset = queryset.filter(league__season_start__gte=start_date)
+      
+      if end_date:
+        queryset = queryset.filter(league__season_end__lte=end_date)
+
+      if team_name:
+        queryset = queryset.filter(name__icontains=team_name)
+      return queryset
+  
+  def get_context_data(self, **kwargs):
+      context = super().get_context_data(**kwargs)
+      teams = context['teams']
+
+      context['active'] = teams.filter(league__is_active=True)
+      context['previous'] = teams.filter(league__is_active=False)
+      return context
   
 class MyLeagues(LoginRequiredMixin, ListView):
+  """ View to display leagues for a user """
   login_url = 'login/'
   redirect_field_name = 'redirect_to'
   
   model = League
-  template_name = 'SundayLeague/my_teams.html'
-  context_object_name = 'teams'
+  template_name = 'SundayLeague/my_pages/my_leagues.html'
+  context_object_name = 'leagues'
 
   def get_queryset(self):
     profile = SLProfile.objects.get(user=self.request.user)
     teams = profile.getTeams()
-    leagues = League.objects.filter(team__in=teams).distinct()
-    return leagues
+    queryset = League.objects.filter(team__in=teams).distinct()
+
+    sport = self.request.GET.get('sport')
+    level = self.request.GET.get('level')
+    start_date = self.request.GET.get('start_date')
+    end_date = self.request.GET.get('end_date')
+    league_name = self.request.GET.get('name')
+
+    if sport:
+      queryset = queryset.filter(sport_type__icontains=sport)
+
+    if level:
+      queryset = queryset.filter(level__icontains=level)
+
+    if start_date:
+      queryset = queryset.filter(season_start__gte=start_date)
+    
+    if end_date:
+      queryset = queryset.filter(season_end__lte=end_date)
+
+    if league_name:
+      queryset = queryset.filter(league_name__icontains=league_name)
+    return queryset
+  
+  def get_context_data(self, **kwargs):
+     context = super().get_context_data(**kwargs)
+     leagues = context['leagues']
+     context['active'] = leagues.filter(is_active = True)
+     context['previous'] = leagues.filter(is_active = False)
+
+     return context
     
     
 class MyGames(LoginRequiredMixin, ListView):
+    """ View to display games for a user """
     login_url = 'login/'
     redirect_field_name = 'redirect_to'
     
     model = Game
-    template_name = 'SundayLeague/my_games.html'
+    template_name = 'SundayLeague/my_pages/my_games.html'
     context_object_name = 'games'
 
     def get_queryset(self):
@@ -164,11 +268,45 @@ class MyGames(LoginRequiredMixin, ListView):
         teams = profile.getTeams()
 
         # Get all upcoming games involving those teams
-        return Game.objects.filter(
+        queryset = Game.objects.filter(
             (Q(team1__in=teams) | Q(team2__in=teams)) &
             Q(winner=None)
         ).order_by('time')
+
+        sport = self.request.GET.get('sport')
+        level = self.request.GET.get('level')
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        team_name = self.request.GET.get('name')
+
+        if sport:
+          queryset = queryset.filter(league__sport_type__icontains=sport)
+
+        if level:
+          queryset = queryset.filter(league__level__icontains=level)
+
+        if start_date:
+          queryset = queryset.filter(time__gte=start_date)
+        
+        if end_date:
+          queryset = queryset.filter(time__lte=end_date)
+
+        if team_name:
+          queryset = queryset.filter(
+              Q(team1__name__icontains=team_name) |
+              Q(team2__name__icontains=team_name)
+          )
+        return queryset
     
+    def get_context_data(self, **kwargs):
+      """ Might be a little inefficient but we can worry about that later"""
+      context = super().get_context_data(**kwargs)
+       
+      games = context['games']
+      now = timezone.now()
+      context['upcoming'] = games.filter(time__gt=now)
+      context['completed'] = games.filter(time__lt=now)
+      return context
 
 class CustomLoginView(LoginView):
     template_name = 'SundayLeague/login.html'
@@ -182,11 +320,3 @@ class CustomLoginView(LoginView):
         # Otherwise redirect to user's profile
         profile = self.request.user.slprofile
         return reverse('detail_profile', kwargs={'pk': profile.pk})
-    
-class CustomLogoutView(LogoutView):
-  def get_success_url(self):
-    # If ?next= exists, respect it (important!)
-    next_url = self.request.GET.get('next')
-    if next_url:
-        return next_url 
-    return reverse('list_leagues')

@@ -12,8 +12,8 @@ urlpatterns = [
 
   #Not fully functional user views yet
   path('login/', CustomLoginView.as_view(), name='login'),
-  path('logout/', CustomLogoutView.as_view(), name='logout'),
-  path('my_leagues', DetailLeague.as_view(), name='my_leagues'),
-  path('my_teams', DetailLeague.as_view(), name='my_teams'),
-  path('my_games', DetailLeague.as_view(), name='my_games'),
+  path('logout/', auth_views.LogoutView.as_view(next_page='list_leagues'),name='logout'),
+  path('my_leagues', MyLeagues.as_view(), name='my_leagues'),
+  path('my_teams', MyTeams.as_view(), name='my_teams'),
+  path('my_games', MyGames.as_view(), name='my_games'),
 ]

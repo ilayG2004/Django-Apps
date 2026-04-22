@@ -7,6 +7,7 @@ DATE: 4/17/2026
 {% extends 'SundayLeague/base.html' %}
 
 {% block content %}
+  {% include 'SundayLeague/search_forms/basic_filter.html' %}
   <h2>Leagues Starting Soon</h2>
   {% for league in leagues %}
     <a href="{% url 'detail_league' league.pk %}">
