@@ -7,6 +7,15 @@ DATE: 4/17/2026
 {% extends 'SundayLeague/base.html' %}
 
 {% block content %}
+  {% if request.user == league.league_admin %}
+    <a href="{% url 'create_game' pk=league.pk %}">Schedule Games</a>
+    <!--
+    <form>
+      <input type="checkbox" name="discoverable" value="discpverabn">
+    </form>-->
+  {% endif %}
+  <img src="{{league.getImageUrl}}">
+  <h3>{{league.bio}}</h3>
   <div class="two-container">
     <div class="two-thirds">
       <h2>Upcoming Games</h2>

@@ -1,0 +1,14 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2> Request to join a team. </h2>
+  <p> Add a message so the team can get to know you. Requests will be approved or denied by this team's admin. Only the team admin can view your request. </p>
+  <form method="POST">
+    {% csrf_token %}w
+    <table>
+      {{form.as_table}}
+    </table>
+
+    <input type="submit" name="submit" value="Create">
+  </form>
+{% endblock %}

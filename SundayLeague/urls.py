@@ -16,4 +16,12 @@ urlpatterns = [
   path('my_leagues', MyLeagues.as_view(), name='my_leagues'),
   path('my_teams', MyTeams.as_view(), name='my_teams'),
   path('my_games', MyGames.as_view(), name='my_games'),
+
+  path('create_league', CreateLeague.as_view(), name='create_league'),
+  path('create_game/<int:pk>', CreateGame.as_view(), name='create_game'),
+  path('create_team', CreateTeam.as_view(), name='create_team'),
+  path('join_team/<int:pk>', CreateTeamJoinRequest.as_view(), name='join_team'),
+  #path('create_team', CreateTeam.as_view(), name='create_team'),
+  #path('create_team_join_request', CreateTeamJoinRequest.as_view(), name='create_team_join_request'),
+  #path('create_league_join_request', CreateLeagueJoinRequest.as_view(), name='create_league_join_request')
 ]

@@ -1,0 +1,15 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2> Create a game </h2>
+  <p> Schedules a game between two teams in your league. </p>
+  <p> NOTE: You, or members of the team can upload the final score and declare a winner after the scheduled time for the game has passed. </p>
+  <form method="POST">
+    {% csrf_token %}
+    <table>
+      {{form.as_table}}
+    </table>
+
+    <input type="submit" name="submit" value="Create">
+  </form>
+{% endblock %}

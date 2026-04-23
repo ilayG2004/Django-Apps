@@ -1,27 +1,46 @@
 {% extends 'SundayLeague/base.html' %}
 {% block content %}
-  <!-- Active leagues -->
-  <h2>Active Leagues</h2>
-  <!-- Ideally we want filtering for active vs inactive stuff to be separate but that can be worried about later -->
+  
   {% include 'SundayLeague/search_forms/basic_filter.html' %}
+  <h2> Managing Leagues </h2>
+  {% for league in managing %}
+    <a href="{% url 'detail_league' league.pk %}">
+      <div class="card">
+        <p class="league-title">{{league.league_name}}</p>
+        <p class="type-text">Sport: {{league.sport_type}}</p>
+        <p class="seriousness">Level: {{league.level}}</p>
+        <p class="dates">{{league.season_start}} - {{league.season_end}}</p>
+      </div>
+    </a>
+  {% endfor %}
+  <h2>Active Leagues</h2>
+  <!-- Active leagues -->
+  <!-- Ideally we want filtering for active vs inactive stuff to be separate but that can be worried about later -->
+  
   {% for league in active %}
-    <div class="card">
-      <p class="league-title">{{league.league_name}}</p>
-      <p class="type-text">Sport: {{league.sport_type}}</p>
-      <p class="seriousness">Level: {{league.level}}</p>
-      <p class="dates">{{league.season_start}} - {{league.season_end}}</p>
-    </div>
+    <a href="{% url 'detail_league' league.pk %}">
+      <div class="card">
+        <p class="league-title">{{league.league_name}}</p>
+        <p class="type-text">Sport: {{league.sport_type}}</p>
+        <p class="seriousness">Level: {{league.level}}</p>
+        <p class="dates">{{league.season_start}} - {{league.season_end}}</p>
+      </div>
+    </a>
   {% endfor %}
 
   <!-- Previous leagues. Maybe add a pagination form for this. -->
   <h2>Previous Leagues</h2>
   {% for league in previous %}
-    <div class="card">
-      <p class="league-title">{{league.league_name}}</p>
-      <p class="type-text">Sport: {{league.sport_type}}</p>
-      <p class="seriousness">Level: {{league.level}}</p>
-      <p class="dates">{{league.season_start}} - {{league.season_end}}</p>
-    </div>
+    <a href="{% url 'detail_league' league.pk %}">
+      <div class="card">
+        <p class="league-title">{{league.league_name}}</p>
+        <p class="type-text">Sport: {{league.sport_type}}</p>
+        <p class="seriousness">Level: {{league.level}}</p>
+        <p class="dates">{{league.season_start}} - {{league.season_end}}</p>
+      </div>
+    </a>
   {% endfor %}
-
+  <div class="tool-bar">
+    <a href="{% url 'create_league' %}"> Start a league </a>
+  </div>
 {% endblock %}

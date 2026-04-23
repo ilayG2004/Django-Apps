@@ -4,17 +4,19 @@ AUTHOR: Ilay Guler (ilay2004@bu.edu)
 DESCRIPTION: Generic views and forms acting dynamically rendering content to users from html template by reading existing data model instances.
 DATE: 4/17/2026
 """
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import *
 from .models import *
+from .forms import CreateLeagueForm, CreateGameForm, CreateTeamForm, CreateTeamJoinRequestForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.db.models import Q
+from django.db.models import Q, Count, F
 from django.urls import reverse
 from django.contrib.auth.views import LogoutView
 from django.urls import reverse_lazy
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, HttpResponse
 from django.utils import timezone
+from django.contrib import messages
 # Create your views here.
 class ListLeagues(ListView):
   """ View to list active leagues """
@@ -30,6 +32,12 @@ class ListLeagues(ListView):
     start_date = self.request.GET.get('start_date')
     end_date = self.request.GET.get('end_date')
     league_name = self.request.GET.get('name')
+
+    queryset = queryset.filter(is_discoverable = True)
+    
+    # Check if number of teams associated with a league is not over the limit
+    queryset = queryset.annotate(team_count=Count('teams'))
+    queryset = queryset.filter(team_count__lt=F('max_teams'))
 
     if sport:
       queryset = queryset.filter(sport_type__icontains=sport)
@@ -88,7 +96,6 @@ class TeamDetail(DetailView):
     context = super().get_context_data(**kwargs)
 
     team = self.object  # already fetched by DetailView
-
     context["members"] = team.getTeamMembers()
     context["record"] = team.getWinLosses()
 
@@ -184,28 +191,26 @@ class MyTeams(LoginRequiredMixin, ListView):
       team_name = self.request.GET.get('name')
 
       if sport:
-        queryset = queryset.filter(league__sport_type__icontains=sport)
+        queryset = queryset.filter(leagues__sport_type__icontains=sport)
 
       if level:
-        queryset = queryset.filter(league__level__icontains=level)
+        queryset = queryset.filter(leagues__level__icontains=level)
 
       if start_date:
-        queryset = queryset.filter(league__season_start__gte=start_date)
+        queryset = queryset.filter(leagues__season_start__gte=start_date)
       
       if end_date:
-        queryset = queryset.filter(league__season_end__lte=end_date)
+        queryset = queryset.filter(leagues__season_end__lte=end_date)
 
       if team_name:
         queryset = queryset.filter(name__icontains=team_name)
       return queryset
   
   def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      teams = context['teams']
-
-      context['active'] = teams.filter(league__is_active=True)
-      context['previous'] = teams.filter(league__is_active=False)
-      return context
+    context = super().get_context_data(**kwargs)
+    teams = context['teams']
+    context['managing'] = teams.filter(team_admin = self.request.user)
+    return context
   
 class MyLeagues(LoginRequiredMixin, ListView):
   """ View to display leagues for a user """
@@ -218,8 +223,13 @@ class MyLeagues(LoginRequiredMixin, ListView):
 
   def get_queryset(self):
     profile = SLProfile.objects.get(user=self.request.user)
-    teams = profile.getTeams()
-    queryset = League.objects.filter(team__in=teams).distinct()
+    teams = profile.getTeams().values_list("id", flat=True)
+    queryset = League.objects.filter(teams__id__in=teams).distinct()
+
+    print("USER:", self.request.user)
+    print("TEAMS:", teams)
+    print("TEAM IDS:", list(teams.values_list("id", flat=True)))
+    print("LEAGUES FOUND:", queryset)
 
     sport = self.request.GET.get('sport')
     level = self.request.GET.get('level')
@@ -241,15 +251,19 @@ class MyLeagues(LoginRequiredMixin, ListView):
 
     if league_name:
       queryset = queryset.filter(league_name__icontains=league_name)
+    print("LEAGUES FINALIZED:", queryset)
     return queryset
   
   def get_context_data(self, **kwargs):
-     context = super().get_context_data(**kwargs)
-     leagues = context['leagues']
-     context['active'] = leagues.filter(is_active = True)
-     context['previous'] = leagues.filter(is_active = False)
-
-     return context
+      context = super().get_context_data(**kwargs)
+      leagues = context['leagues']
+      now = timezone.localdate()
+      context['managing'] = leagues.filter(league_admin = self.request.user)
+      context['active'] = leagues.filter(season_start__lte=now, season_end__gte=now)
+      context['previous'] = leagues.filter(season_end__lt=now)
+      print("LEAGUES ACTIVE:", context['active'])
+      print("LEAGUES PREVIOUS:", context['previous'])
+      return context
     
     
 class MyGames(LoginRequiredMixin, ListView):
@@ -265,12 +279,12 @@ class MyGames(LoginRequiredMixin, ListView):
         profile = SLProfile.objects.get(user=self.request.user)
 
         # Get user's teams (as queryset ideally)
-        teams = profile.getTeams()
+        teams = profile.getTeams().values_list("id", flat=True)
 
         # Get all upcoming games involving those teams
         queryset = Game.objects.filter(
-            (Q(team1__in=teams) | Q(team2__in=teams)) &
-            Q(winner=None)
+            Q(team1_id__in=teams) |
+            Q(team2_id__in=teams)
         ).order_by('time')
 
         sport = self.request.GET.get('sport')
@@ -303,9 +317,16 @@ class MyGames(LoginRequiredMixin, ListView):
       context = super().get_context_data(**kwargs)
        
       games = context['games']
-      now = timezone.now()
-      context['upcoming'] = games.filter(time__gt=now)
-      context['completed'] = games.filter(time__lt=now)
+      now = timezone.localdate()
+      context['upcoming'] = games.filter(
+        time__gt=now,
+        winner__isnull=True
+      )
+
+      context['completed'] = games.filter(
+          Q(time__lte=now) |
+          Q(winner__isnull=False)
+      )
       return context
 
 class CustomLoginView(LoginView):
@@ -320,3 +341,87 @@ class CustomLoginView(LoginView):
         # Otherwise redirect to user's profile
         profile = self.request.user.slprofile
         return reverse('detail_profile', kwargs={'pk': profile.pk})
+    
+
+# ------ Create Forms ------------
+class CreateLeague(CreateView):
+  model=League
+  form_class = CreateLeagueForm
+  template_name = 'SundayLeague/create_forms/create_league.html'
+  
+  def form_valid(self, form):
+      """ Assigns the league admin as the form creating user """
+      form.instance.league_admin = self.request.user
+      response = super().form_valid(form)
+      messages.success(self.request, "League created successfully!")
+      return response
+  
+  def get_success_url(self):
+    return reverse('detail_league', kwargs={'pk': self.object.pk})
+
+class CreateGame(CreateView):
+  model=Game
+  form_class = CreateGameForm
+  template_name='SundayLeague/create_forms/create_game.html'
+
+  def form_valid(self, form):
+    """ Assigns the league to the game being created """
+    league_pk = self.kwargs.get('pk')
+    league = League.objects.get(pk=league_pk)
+    if self.request.user != league.league_admin:
+      return HttpResponse('Unauthorized', status=401)
+    form.instance.league = league
+    response = super().form_valid(form)
+    return response
+  
+  def get_success_url(self):
+    return reverse('detail_league', kwargs={'pk': self.kwargs.get('pk')})
+  
+class CreateTeam(CreateView):
+  model=Team
+  form_class = CreateTeamForm
+  template_name = 'SundayLeague/create_forms/create_team.html'
+
+  def form_valid(self, form):
+    """ Assigns the league admin as the form creating user """
+    form.instance.team_admin = self.request.user
+    
+    response = super().form_valid(form)
+    TeamMember.objects.create(
+            user=self.request.user,
+            team=self.object
+        )
+    messages.success(self.request, "Team created successfully!")
+    return response
+  
+  def get_success_url(self):
+    return reverse('detail_team', kwargs={'pk': self.object.pk})
+  
+class CreateTeamJoinRequest(CreateView):
+  model=TeamJoinRequest
+  form_class = CreateTeamJoinRequestForm
+  template_name = 'SundayLeague/create_forms/team_request.html'
+
+  def form_valid(self, form):
+    user = self.request.user
+    team_pk = self.kwargs.get('pk')
+    team = Team.objects.get(pk=team_pk)
+
+    # Prevent duplicate request BEFORE saving
+    if TeamJoinRequest.objects.filter(requesting_user=user, team=team).exists():
+        messages.success(self.request, "Already requested to join this team. Request pending.")
+        return redirect('detail_team', pk=team_pk)
+
+    # Safe to create request
+    form.instance.requesting_user = user
+    form.instance.team = team
+
+    response = super().form_valid(form)
+    messages.success(self.request, "Join request sent!")
+    return response
+
+    messages.success(self.request, "Request to join this team sent!")
+    return response
+  
+  def get_success_url(self):
+    return reverse('detail_team', kwargs={'pk': self.kwargs.get('pk')})

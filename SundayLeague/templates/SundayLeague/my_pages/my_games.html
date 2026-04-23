@@ -1,8 +1,9 @@
 {% extends 'SundayLeague/base.html' %}
 {% block content %}
-  <h2>Upcoming Games:</h2>
+  
   <!-- Ideally we want filtering for active vs inactive stuff to be separate but that can be worried about later -->
   {% include 'SundayLeague/search_forms/basic_filter.html' %}
+  <h2>Upcoming Games:</h2>
   {% for game in upcoming %}
       <div class="card">
         <div class="game-card-header">

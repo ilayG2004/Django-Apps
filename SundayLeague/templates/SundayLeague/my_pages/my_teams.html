@@ -3,30 +3,27 @@
   <!-- Active teams -->
   <!-- Ideally we want filtering for active vs inactive stuff to be separate but that can be worried about later -->
   {% include 'SundayLeague/search_forms/basic_filter.html' %}
-  <h2>Active Teams</h2>
-  {% for team in active %}
+
+  <h2> Managing Teams </h2>
+  {% for team in managing %}
     <div class="card">
         <div class="game-card-header">
           <img src="{{team.getImageUrl}}" class="team-pfp">
           <p class="league-title">{{team.name}}</p>
         </div>
-        <p class="type-text">Sport: {{team.league.sport_type}}</p>
-        <p class="seriousness">Level: {{team.league.level}}</p>
-        <p class="dates">{{team.league.season_start}} - {{team.league.season_end}}</p>
+    </div>
+  {% endfor %}
+  <h2>Active Teams</h2>
+  {% for team in teams %}
+    <div class="card">
+        <div class="game-card-header">
+          <img src="{{team.getImageUrl}}" class="team-pfp">
+          <p class="league-title">{{team.name}}</p>
+        </div>
     </div>
   {% endfor %}
 
-  <!-- Previous teams. Maybe add a pagination form for this. -->
-  <h2> Team History </h2>
-  {% for team in previous %}
-    <div class="card">
-      <div class="game-card-header">
-        <img src="{{team.getImageUrl}}" class="team-pfp">
-        <p class="league-title">{{team.name}}</p>
-      </div>
-      <p class="type-text">Sport: {{team.league.sport_type}}</p>
-      <p class="seriousness">Level: {{team.league.level}}</p>
-      <p class="dates">{{team.league.season_start}} - {{team.league.season_end}}</p>
-    </div>
-  {% endfor %}
+  <div class="tool-bar">
+    <a href="{% url 'create_team' %}"> Create a team </a>
+  </div>
 {% endblock %}

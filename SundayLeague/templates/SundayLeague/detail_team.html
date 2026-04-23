@@ -8,8 +8,14 @@ DATE: 4/18/2026
 {% block content %}
   <!--Basic team details-->
   {% if team %}
-    
-      <h2>{{team.name}}</h2>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-success">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+    <h2>{{team.name}}</h2>
       
     <div class="game-card-header">
       {% if team.picture %}
@@ -17,7 +23,6 @@ DATE: 4/18/2026
       {% else %}
         <p>No picture found. Generate placeholder</p>
       {% endif %}
-      <h3>{{team.league}}</h3>
     </div>
   {% endif %}
 
@@ -48,4 +53,17 @@ DATE: 4/18/2026
     </div>
     </a>
   {% endfor %}
+
+  <h2> Leagues </h2>
+  {% for league in team.leagues.all %}
+    <a href="{% url 'detail_league' league.pk %}">
+      <div class="card">
+        <p class="league-title">{{league.league_name}}</p>
+        <p class="type-text">Sport: {{league.sport_type}}</p>
+        <p class="seriousness">Level: {{league.level}}</p>
+        <p class="dates">{{league.season_start}} - {{league.season_end}}</p>
+      </div>
+    </a>
+  {% endfor %}
+  <a href="{% url 'join_team' pk=team.pk %}"> Join team </a>
 {% endblock %}
