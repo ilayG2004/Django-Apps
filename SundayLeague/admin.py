@@ -14,4 +14,5 @@ admin.site.register(Team)
 admin.site.register(LeaguePost)
 admin.site.register(TeamMember)
 admin.site.register(Upvote)
-
+admin.site.register(TeamJoinRequest)
+admin.site.register(LeagueJoinRequest)

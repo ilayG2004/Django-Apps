@@ -62,10 +62,19 @@ class CreateTeamForm(forms.ModelForm):
   """ and also, joining an empty team to a league is kind of weird. We should allow a single team to exist indepdent of a league. And allow it to join many """
   class Meta:
     model=Team
-    fields = ['name', 'picture']
+    fields = ['name', 'picture','bio']
 
 class CreateTeamJoinRequestForm(forms.ModelForm):
   """ Form associated with a user requesting to join a team. The team and user should be derived from the interaction """
   class Meta:
     model=TeamJoinRequest
     fields=['message']
+
+
+# -------------- Update forms -----------
+class UpdateTeamForm(forms.ModelForm):
+  class Meta:
+    model=Team
+    fields=['name','picture','bio']
+
+

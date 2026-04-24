@@ -6,21 +6,25 @@
 
   <h2> Managing Teams </h2>
   {% for team in managing %}
-    <div class="card">
-        <div class="game-card-header">
-          <img src="{{team.getImageUrl}}" class="team-pfp">
-          <p class="league-title">{{team.name}}</p>
-        </div>
-    </div>
+    <a href="{% url 'detail_team' team.pk %}">
+      <div class="card">
+          <div class="game-card-header">
+            <img src="{{team.getImageUrl}}" class="team-pfp">
+            <p class="league-title">{{team.name}}</p>
+          </div>
+      </div>
+    </a>
   {% endfor %}
   <h2>Active Teams</h2>
   {% for team in teams %}
-    <div class="card">
-        <div class="game-card-header">
-          <img src="{{team.getImageUrl}}" class="team-pfp">
-          <p class="league-title">{{team.name}}</p>
-        </div>
-    </div>
+   <a href="{% url 'detail_team' team.pk %}">
+      <div class="card">
+          <div class="game-card-header">
+            <img src="{{team.getImageUrl}}" class="team-pfp">
+            <p class="league-title">{{team.name}}</p>
+          </div>
+      </div>
+    </a>
   {% endfor %}
 
   <div class="tool-bar">

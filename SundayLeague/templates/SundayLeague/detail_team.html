@@ -6,8 +6,8 @@ DATE: 4/18/2026
 -->
 {% extends 'SundayLeague/base.html' %}
 {% block content %}
-  <!--Basic team details-->
   {% if team %}
+    <!-- Alert messages appear after applying to join a team -->
     {% if messages %}
       {% for message in messages %}
         <div class="alert alert-success">
@@ -15,6 +15,22 @@ DATE: 4/18/2026
         </div>
       {% endfor %}
     {% endif %}
+
+    <!--Admin tools-->
+    {% if request.user.is_authenticated and request.user == team.team_admin %}
+        <a href="{% url 'edit_team' team.pk %}">Edit team</a>
+        <a href="{% url 'check_team_requests' team.pk %}"> Check join requests </a>
+        <a href="{% url 'kick_members' team.pk %}"> Kick members </a>
+    {% endif %}
+
+    <!-- Button to join team -->
+    {% if is_member %}
+        <p>You're a member of this team!</p>
+    {% elif not is_member %}
+        <a href="{% url 'join_team' team.pk %}">Request to join</a>
+    {% endif %}
+
+    <!-- Team info -->
     <h2>{{team.name}}</h2>
       
     <div class="game-card-header">
@@ -23,6 +39,7 @@ DATE: 4/18/2026
       {% else %}
         <p>No picture found. Generate placeholder</p>
       {% endif %}
+      {{team.bio}}
     </div>
   {% endif %}
 
@@ -34,10 +51,10 @@ DATE: 4/18/2026
   {% endif %}
   </div>
 
-  <!--List of memember-->
+  <!--List of memembers-->
   <h2>Members</h2>
   {% for member in members %}
-    <a href="{% url 'detail_profile' member.pk %}">
+    <a href="{% url 'detail_profile' member.getProfile.pk %}">
     <div class="card">
       <div class="game-card-header">
      
@@ -54,6 +71,7 @@ DATE: 4/18/2026
     </a>
   {% endfor %}
 
+  <!--Leagues-->
   <h2> Leagues </h2>
   {% for league in team.leagues.all %}
     <a href="{% url 'detail_league' league.pk %}">

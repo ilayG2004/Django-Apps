@@ -4,17 +4,17 @@ AUTHOR: Ilay Guler (ilay2004@bu.edu)
 DESCRIPTION: Generic views and forms acting dynamically rendering content to users from html template by reading existing data model instances.
 DATE: 4/17/2026
 """
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import *
 from .models import *
-from .forms import CreateLeagueForm, CreateGameForm, CreateTeamForm, CreateTeamJoinRequestForm
+from .forms import *
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.db.models import Q, Count, F
 from django.urls import reverse
 from django.contrib.auth.views import LogoutView
 from django.urls import reverse_lazy
-from django.http import HttpResponseBadRequest, HttpResponse
+from django.http import HttpResponseForbidden, HttpResponse
 from django.utils import timezone
 from django.contrib import messages
 # Create your views here.
@@ -96,8 +96,15 @@ class TeamDetail(DetailView):
     context = super().get_context_data(**kwargs)
 
     team = self.object  # already fetched by DetailView
-    context["members"] = team.getTeamMembers()
+    members = team.getTeamMembers()
+    context["members"] = members
     context["record"] = team.getWinLosses()
+
+    user = self.request.user
+    context["is_member"] = (
+        user.is_authenticated and 
+        members.filter(user=user).exists()
+    )
 
     return context
 
@@ -344,7 +351,7 @@ class CustomLoginView(LoginView):
     
 
 # ------ Create Forms ------------
-class CreateLeague(CreateView):
+class CreateLeague(LoginRequiredMixin, CreateView):
   model=League
   form_class = CreateLeagueForm
   template_name = 'SundayLeague/create_forms/create_league.html'
@@ -359,7 +366,7 @@ class CreateLeague(CreateView):
   def get_success_url(self):
     return reverse('detail_league', kwargs={'pk': self.object.pk})
 
-class CreateGame(CreateView):
+class CreateGame(LoginRequiredMixin, CreateView):
   model=Game
   form_class = CreateGameForm
   template_name='SundayLeague/create_forms/create_game.html'
@@ -377,7 +384,7 @@ class CreateGame(CreateView):
   def get_success_url(self):
     return reverse('detail_league', kwargs={'pk': self.kwargs.get('pk')})
   
-class CreateTeam(CreateView):
+class CreateTeam(LoginRequiredMixin, CreateView):
   model=Team
   form_class = CreateTeamForm
   template_name = 'SundayLeague/create_forms/create_team.html'
@@ -397,7 +404,7 @@ class CreateTeam(CreateView):
   def get_success_url(self):
     return reverse('detail_team', kwargs={'pk': self.object.pk})
   
-class CreateTeamJoinRequest(CreateView):
+class CreateTeamJoinRequest(LoginRequiredMixin, CreateView):
   model=TeamJoinRequest
   form_class = CreateTeamJoinRequestForm
   template_name = 'SundayLeague/create_forms/team_request.html'
@@ -420,8 +427,142 @@ class CreateTeamJoinRequest(CreateView):
     messages.success(self.request, "Join request sent!")
     return response
 
-    messages.success(self.request, "Request to join this team sent!")
-    return response
-  
   def get_success_url(self):
     return reverse('detail_team', kwargs={'pk': self.kwargs.get('pk')})
+  
+
+class CreateTeamMember(LoginRequiredMixin, View):
+  def post(self, request, team_pk, user_to_join):
+    team = get_object_or_404(Team, pk=team_pk)
+
+    # Permission check
+    if team.team_admin != request.user:
+        return HttpResponseForbidden("Not allowed")
+
+    user = get_object_or_404(User, pk=user_to_join)
+
+    # Ensure join request exists
+    join_request = TeamJoinRequest.objects.filter(
+        team=team,
+        requesting_user=user
+    ).first()
+
+    if not join_request:
+        messages.error(request, "Join request does not exist.")
+        return redirect('check_team_requests', pk=team.pk)
+
+    # Prevent duplicates
+    if TeamMember.objects.filter(team=team, user=user).exists():
+        messages.warning(request, "User is already a member.")
+        join_request.delete()
+        return redirect('check_team_requests', pk=team.pk)
+
+    # Create member
+    TeamMember.objects.create(team=team, user=user)
+
+    # Delete request
+    join_request.delete()
+
+    messages.success(request, "User added to team.")
+
+    return redirect('check_team_requests', pk=team.pk)
+  
+class DeleteTeamRequest(LoginRequiredMixin, View):
+  def post(self, request, team_pk, user_to_join):
+    team = get_object_or_404(Team, pk=team_pk)
+
+    # Permission check
+    if team.team_admin != request.user:
+        return HttpResponseForbidden("Not allowed")
+
+    user = get_object_or_404(User, pk=user_to_join)
+
+    # Ensure join request exists
+    join_request = TeamJoinRequest.objects.filter(
+        team=team,
+        requesting_user=user
+    ).first()
+
+    if not join_request:
+        messages.error(request, "Join request does not exist.")
+        return redirect('check_team_requests', pk=team.pk)
+
+    # Delete request
+    join_request.delete()
+
+    messages.success(request, "Request ignored.")
+
+    return redirect('check_team_requests', pk=team.pk)
+
+
+# ---------- Edit Forms ------------------
+class EditTeam(LoginRequiredMixin, UpdateView):
+  model = Team
+  form_class = UpdateTeamForm
+  template_name = 'SundayLeague/update_forms/update_team.html'
+
+  def get_queryset(self):
+        """ Prevents non-team admin users from accessing this form """
+        """ This is because get_queryset is used by django to fetch the object the form is changing """
+        return Team.objects.filter(team_admin=self.request.user)
+  def get_success_url(self):
+    return reverse('detail_team', kwargs={'pk': self.kwargs.get('pk')})
+
+
+class CheckTeamRequests(LoginRequiredMixin, View):
+  template_name = 'SundayLeague/update_forms/check_team_requests.html'
+
+  def get(self, request, pk):
+    team = get_object_or_404(Team, pk=pk)
+
+    if team.team_admin != request.user:
+        return HttpResponseForbidden("Not allowed")
+    
+    requests = TeamJoinRequest.objects.filter(team=team).select_related('requesting_user')
+
+    return render(request, self.template_name, {
+        'team': team,
+        'requests': requests
+    })
+  
+  
+# ------------- Delete Forms --------------------
+class KickMembersView(LoginRequiredMixin, View):
+    template_name = 'SundayLeague/delete_forms/kick_members.html'
+
+    def get(self, request, pk):
+        team = get_object_or_404(Team, pk=pk)
+
+        # Permission check
+        if team.team_admin != request.user:
+            return HttpResponseForbidden("Not allowed.")
+
+        members = TeamMember.objects.filter(team=team).exclude(
+          user=team.team_admin
+        ).select_related('user')
+
+        return render(request, self.template_name, {
+            'team': team,
+            'members': members
+        })
+
+    def post(self, request, pk):
+        team = get_object_or_404(Team, pk=pk)
+
+        # Permission check (again for POST)
+        if team.team_admin != request.user:
+            return HttpResponseForbidden("Not allowed.")
+
+        member_ids = request.POST.getlist('members')
+
+        # Only allow deleting members and NEVER the admin
+        members_to_delete = TeamMember.objects.filter(
+            team=team,
+            id__in=member_ids
+        ).exclude(user=team.team_admin)
+
+        deleted_count = members_to_delete.count()
+        members_to_delete.delete()
+        messages.success(request, f"{deleted_count} member(s) removed.")
+
+        return redirect('detail_team', pk=team.pk)

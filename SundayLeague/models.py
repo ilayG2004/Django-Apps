@@ -154,6 +154,7 @@ class Team(models.Model):
   leagues = models.ManyToManyField(League, related_name="teams")
   picture = models.ImageField(default=None, blank=True, null=True)
   discoverable = models.BooleanField(default=True)
+  bio = models.TextField(blank=True, null=True)
   def __str__(self):  
     """ Stringified representation of a model instance """
     return 'Team:' +self.name + ' | ' + str(self.pk)

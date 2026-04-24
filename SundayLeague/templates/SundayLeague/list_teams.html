@@ -5,14 +5,16 @@
   <h3>Teams looking for new members.</h3>
   {% include 'SundayLeague/search_forms/basic_filter.html' %}
   {% for team in teams %}
-  <div class="card">
-      <div class="game-card-header">
-        <img src="{{team.getImageUrl}}" class="team-pfp">
-        <p class="league-title">{{team.name}}</p>
-      </div>
-      <p class="type-text">Sport: {{team.league.sport_type}}</p>
-      <p class="seriousness">Level: {{team.league.level}}</p>
-      <p class="dates">{{team.league.season_start}} - {{team.league.season_end}}</p>
-  </div>
+  <a href="{% url 'detail_team' team.pk %}">
+    <div class="card">
+        <div class="game-card-header">
+          <img src="{{team.getImageUrl}}" class="team-pfp">
+          <p class="league-title">{{team.name}}</p>
+        </div>
+        <p class="type-text">Sport: {{team.league.sport_type}}</p>
+        <p class="seriousness">Level: {{team.league.level}}</p>
+        <p class="dates">{{team.league.season_start}} - {{team.league.season_end}}</p>
+    </div>
+  </a>
   {% endfor %}
 {% endblock %}
