@@ -95,6 +95,15 @@ class League(models.Model):
     games = self.getGames()
     for game in games:
         if game.winner is not None:
+            # Error handling in case a team was removed from this league
+            if game.team1.name not in losses:
+              losses[game.team1.name] = 0
+              wins[game.team1.name] = 0
+            if game.team2.name not in losses:
+              losses[game.team2.name] = 0
+              wins[game.team2.name] = 0
+            
+            # Actual logic for calculating win/losses
             if game.team1 != game.winner:
                 losses[game.team1.name] += 1
                 wins[game.team2.name] += 1
@@ -114,7 +123,7 @@ class League(models.Model):
   
   def getPosts(self):
     # Gets all posts associated with this league
-    posts = LeaguePost.objects.filter(league=self)
+    posts = LeaguePost.objects.filter(league=self).order_by('-time')
     return posts
   
   def isFull(self):
@@ -136,6 +145,7 @@ class LeaguePost(models.Model):
   message = models.TextField()
   image = models.ImageField(blank=True)
   posting_user = models.ForeignKey(User, on_delete=models.CASCADE)
+  time = models.DateTimeField(auto_now=True)
 
   def __str__(self):
     """ Stringified representation of a model instance """

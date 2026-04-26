@@ -13,19 +13,38 @@ DATE: 4/17/2026
     <form>
       <input type="checkbox" name="discoverable" value="discpverabn">
     </form>-->
+    <a href="{% url 'check_league_requests' league.pk %}"> Check join requests </a>
+    <a href="{% url 'kick_teams' league.pk %}"> Kick teams </a>
   {% endif %}
+
+  {% if is_member %}
+    <a href="{% url 'create_league_post' league.pk %}">Create post</a>
+  {% else %}
+    <p>Not member. cant post</p>
+  {% endif %}
+
+  {% if not is_member and is_some_team_admin %}
+    <a href="{% url 'create_league_request' league.pk %}">Request your team to join</a>
+  {% endif %}
+
   <img src="{{league.getImageUrl}}">
   <h3>{{league.bio}}</h3>
   <div class="two-container">
     <div class="two-thirds">
       <h2>Upcoming Games</h2>
         <!--Upcoming games-->
-        {% if games %}
-          {% for game in games %}
+        {% if upcoming_games %}
+          {% for game in upcoming_games %}
             <div class="card">
               <div class="game-card-header">
                 <p class="team-title">{{ game.team1.name }} vs. </p>
                 <p class="team-title">   {{ game.team2.name }}</p>
+                {% if request.user == league.league_admin %}
+                  <a href="{% url 'delete_game' game.pk %}">Delete</a>
+                {% endif %}
+                {% if is_member and time > game.time %}
+                  <a href="{% url 'finalize_score' game.pk %}">Finalize Score</a>
+                {% endif %}
               </div>
               <p class="dates">{{ game.time }}</p>
               {% if game.winner %}
@@ -64,7 +83,31 @@ DATE: 4/17/2026
       {% endif %}
     </div>
   </div>
-  
+
+  <!-- Complted Games -->
+  <h2> Completed Games </h2>
+    {% if completed_games %}
+      {% for game in completed_games %}
+        <div class="card">
+          <div class="game-card-header">
+            <p class="team-title">{{ game.team1.name }} vs. </p>
+            <p class="team-title">   {{ game.team2.name }}</p>
+            {% if request.user == league.league_admin %}
+              <a href="{% url 'delete_game' game.pk %}">Delete</a>
+            {% endif %}
+            {% if is_member and time > game.time %}
+              <a href="{% url 'finalize_score' game.pk %}">Finalize Score</a>
+            {% endif %}
+          </div>
+          <p class="dates">{{ game.time }}</p>
+          <p><strong>Winner: </strong>{{ game.winner.name }}</p>
+          <p> Final Score: {{ game.final_score }}</p>
+          <p>{{ game.location }}</p>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p>No completed games yet.</p>
+    {% endif %}
 
   <h2>Teams</h2>
   <!--Cards of teams-->
@@ -99,6 +142,7 @@ DATE: 4/17/2026
           <img src="{{post.getImageUrl}}" class="post-image">
         {% endif %}
         <p class="post-message">{{post.message}}</p>
+        <p>{{post.time}}</p>
       </div>
     {% endfor %}
   {% else %}

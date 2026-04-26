@@ -1,0 +1,26 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  {% if requests|length %}
+    {% if messages %}
+      <div class="alert alert-success">
+        {{ messages.0 }}
+      </div>
+    {% endif %}
+    {% for req in requests.all %}
+      <div>
+        <p>{{ req.requesting_team.name }} - {{ req.message }}</p>
+        <form method="POST" action="{% url 'team_join_league' league.pk req.requesting_team.pk %}">
+          {% csrf_token %}
+          <button type="submit">Approve</button>
+        </form>
+        <form method="POST" action="{% url 'delete_league_request' league.pk req.requesting_team.pk %}">
+          {% csrf_token %}
+          <button type="submit">Ignore</button>
+        </form>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No requests right now</p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2> Request to join a league on behalf of a team you are managing. </h2>
+  <p> NOTE: You can only make a request for a team to join this league, if you are an admin of that team. </p>
+  <p> Add a message to give more context. Requests will be approved or denied by this league's admin. Only the league admin can view your request. </p>
+  <form method="POST">
+    {% csrf_token %}w
+    <table>
+      {{form.as_table}}
+    </table>
+
+    <input type="submit" name="submit" value="Create">
+  </form>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2> Finalize score for {{object}} </h2>
+  <p> Provide the final score for the match. The league admin can always override the final score. The league admin can also eject dishonest teams. </p>
+  <form method="POST">
+    {% csrf_token %}
+    <table>
+      {{form.as_table}}
+    </table>
+
+    <input type="submit" name="submit" value="Create">
+  </form>
+{% endblock %}

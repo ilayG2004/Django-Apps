@@ -1,0 +1,14 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2> Create a post </h2>
+  <p> Connect with athletes across teams. Make a post! </p>
+  <form method="POST">
+    {% csrf_token %}
+    <table>
+      {{form.as_table}}
+    </table>
+
+    <input type="submit" name="submit" value="Create">
+  </form>
+{% endblock %}

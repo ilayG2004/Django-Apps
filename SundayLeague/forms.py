@@ -50,10 +50,10 @@ class CreateGameForm(forms.ModelForm):
   
 class CreateLeaguePostForm(forms.ModelForm):
   """ Form associated with creating a post for a respective league """
-  """ posting_user deerived from authenticated user filling out this form """
+  """ posting_user derived from authenticated user filling out this form. League derived from pk. """
   class Meta:
     model = LeaguePost
-    fields = ['league', 'message', 'image']
+    fields = ['message', 'image']
 
 class CreateTeamForm(forms.ModelForm):
   """ Form associated with creating a Team for a respective league """
@@ -70,6 +70,11 @@ class CreateTeamJoinRequestForm(forms.ModelForm):
     model=TeamJoinRequest
     fields=['message']
 
+class CreateLeagueJoinRequestForm(forms.ModelForm):
+  class Meta:
+    model=LeagueJoinRequest
+    fields=['requesting_team', 'message']
+
 
 # -------------- Update forms -----------
 class UpdateTeamForm(forms.ModelForm):
@@ -77,4 +82,8 @@ class UpdateTeamForm(forms.ModelForm):
     model=Team
     fields=['name','picture','bio']
 
-
+class FinalizeScoreForm(forms.ModelForm):
+  """ Updates the details of who won a game """
+  class Meta:
+    model=Game
+    fields=['winner', 'final_score']

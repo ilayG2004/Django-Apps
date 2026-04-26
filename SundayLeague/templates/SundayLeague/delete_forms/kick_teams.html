@@ -1,0 +1,20 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2>Kick Teams from {{ league.name }}</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% for team in teams %}
+      <div>
+        <label>
+          <input type="checkbox" name="teams" value="{{ team.id }}">
+          {{ team.name }}
+        </label>
+      </div>
+    {% endfor %}
+
+    <button type="submit">Remove Selected Teams</button>
+  </form>
+{% endblock %}
