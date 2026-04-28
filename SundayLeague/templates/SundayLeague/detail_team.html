@@ -1,7 +1,7 @@
 <!--
 FILE: SundayLeague/detail_team.html
 AUTHOR: Ilay Guler (ilay2004@bu.edu)
-DESCRIPTION: Shows details about a team.
+DESCRIPTION: Shows details about a team. A registered user not on this team can request to join a team. Admins can kick users, edit team bio, and accept users.
 DATE: 4/18/2026
 -->
 {% extends 'SundayLeague/base.html' %}
@@ -17,37 +17,43 @@ DATE: 4/18/2026
     {% endif %}
 
     <!--Admin tools-->
-    {% if request.user.is_authenticated and request.user == team.team_admin %}
-        <a href="{% url 'edit_team' team.pk %}">Edit team</a>
-        <a href="{% url 'check_team_requests' team.pk %}"> Check join requests </a>
-        <a href="{% url 'kick_members' team.pk %}"> Kick members </a>
-    {% endif %}
-
-    <!-- Button to join team -->
-    {% if is_member %}
-        <p>You're a member of this team!</p>
-    {% elif not is_member %}
-        <a href="{% url 'join_team' team.pk %}">Request to join</a>
-    {% endif %}
 
     <!-- Team info -->
+    <div class="special-row">
     <h2>{{team.name}}</h2>
+    <!-- Button to join team -->
+    {% if not is_member %}
+      <div class="admin-toolbar">
+          <a href="{% url 'join_team' team.pk %}" class="join-request">📝Request to join</a>
+      </div>
+    {% endif %}
+    </div>
       
     <div class="game-card-header">
       {% if team.picture %}
-        <img src="{{team.getImageUrl}}" class="team-banner">
+        <img src="{{ team.getImageUrl }}" class="team-banner">
       {% else %}
         <p>No picture found. Generate placeholder</p>
       {% endif %}
-      {{team.bio}}
+      <p class="bio">{{team.bio}}</p>
+
+      <!-- Control panel for admin -->
+      {% if request.user.is_authenticated and request.user == team.team_admin %}
+        <div class="admin-toolbar">
+          <h2>Team Settings</h2>
+            <a href="{% url 'edit_team' team.pk %}">📝 Edit team</a>
+            <a href="{% url 'check_team_requests' team.pk %}">📖 Check join requests </a>
+            <a href="{% url 'kick_members' team.pk %}">🥾 Kick members </a>
+        </div>
+      {% endif %}
     </div>
   {% endif %}
 
   <!--Win-Loss record-->
-  <div class="game-card-header">
+  <div >
   <h2>Record</h2>
   {% if record %}
-    <p class="bold">Wins: {{record.wins}} | Losses: {{record.losses}} </p>
+    <p class="size-2">🏆Wins: {{record.wins}} | 🏳️Losses: {{record.losses}} </p>
   {% endif %}
   </div>
 
@@ -61,11 +67,7 @@ DATE: 4/18/2026
       {% if member.getProfile %}
         <img src="{{member.getProfile.getImageUrl}}" class="user-pfp">
       {% endif %}
-      <p>{{member.user.first_name}}</p>
-      {% if member.getProfile %}
-        <p>{{member.getProfile.bio}}</p>
-      {% endif %}
-      
+      <p class="username">{{member.user.first_name}}</p>
       </div>
     </div>
     </a>

@@ -1,9 +1,12 @@
 {% extends 'SundayLeague/base.html' %}
 
 {% block content %}
-  <form method="POST">
-      {% csrf_token %}
-      <p>Are you sure you want to delete "{{ object }}"?</p>
-      <input type="submit">
-  </form>
+  <a href="{% url 'detail_league' object.league.pk %}">Back</a>
+  <div class="form-container">
+    <form method="POST">
+        {% csrf_token %}
+        <p>Are you sure you want to delete "{{ object }}"?</p>
+        <input type="submit">
+    </form>
+  </div>
 {% endblock %}

@@ -7,9 +7,10 @@
         {{ messages.0 }}
       </div>
     {% endif %}
+    <a href="{% url 'detail_team' team.pk %}">Back</a>
     {% for req in requests.all %}
       <div>
-        <p>{{ req.requesting_user.username }} - {{ req.message }}</p>
+        <p><a href="{% url 'detail_profile' req.requesting_user.pk %}">{{ req.requesting_user.username }}</a> - {{ req.message }}</p>
         <form method="POST" action="{% url 'create_member' team.pk req.requesting_user.pk %}">
           {% csrf_token %}
           <button type="submit">Approve</button>

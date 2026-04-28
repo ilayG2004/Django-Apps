@@ -7,24 +7,9 @@ DATE: 4/17/2026
 {% extends 'SundayLeague/base.html' %}
 
 {% block content %}
-  {% if request.user == league.league_admin %}
-    <a href="{% url 'create_game' pk=league.pk %}">Schedule Games</a>
-    <!--
-    <form>
-      <input type="checkbox" name="discoverable" value="discpverabn">
-    </form>-->
-    <a href="{% url 'check_league_requests' league.pk %}"> Check join requests </a>
-    <a href="{% url 'kick_teams' league.pk %}"> Kick teams </a>
-  {% endif %}
-
-  {% if is_member %}
-    <a href="{% url 'create_league_post' league.pk %}">Create post</a>
-  {% else %}
-    <p>Not member. cant post</p>
-  {% endif %}
 
   {% if not is_member and is_some_team_admin %}
-    <a href="{% url 'create_league_request' league.pk %}">Request your team to join</a>
+    <a href="{% url 'create_league_request' league.pk %}" class="button">📝 Request your team to join</a>
   {% endif %}
 
   <img src="{{league.getImageUrl}}">
@@ -32,18 +17,28 @@ DATE: 4/17/2026
   <div class="two-container">
     <div class="two-thirds">
       <h2>Upcoming Games</h2>
-        <!--Upcoming games-->
+        <!-- Upcoming games -->
         {% if upcoming_games %}
           {% for game in upcoming_games %}
             <div class="card">
               <div class="game-card-header">
-                <p class="team-title">{{ game.team1.name }} vs. </p>
-                <p class="team-title">   {{ game.team2.name }}</p>
+                {% if game.team1.picture %}
+                  <img src="{{ game.team1.getImageUrl }}" class="team-pfp">
+                {% else %}
+                  <p class="team-pfp">❓</p>
+                {% endif %}
+                <p class="team-title">{{ game.team1.name }} vs. {{ game.team2.name }}</p> 
+                {% if game.team2.picture %}
+                  <img src="{{ game.team2.getImageUrl }}" class="team-pfp">
+                {% else %}
+                  <p class="team-pfp">❓</p>
+                {% endif %}
+
                 {% if request.user == league.league_admin %}
-                  <a href="{% url 'delete_game' game.pk %}">Delete</a>
+                  <a href="{% url 'delete_game' game.pk %}" class="delete-game">Delete</a>
                 {% endif %}
                 {% if is_member and time > game.time %}
-                  <a href="{% url 'finalize_score' game.pk %}">Finalize Score</a>
+                  <a href="{% url 'finalize_score' game.pk %}" class="finalize-game">Finalize Score</a>
                 {% endif %}
               </div>
               <p class="dates">{{ game.time }}</p>
@@ -62,6 +57,8 @@ DATE: 4/17/2026
           <p>No games scheduled.</p>
         {% endif %}
     </div>
+
+    <!-- Leaderboard -->
     <div class="one-third">
       <h2>Leaderboard</h2>
       {% if leaderboard %}
@@ -82,6 +79,19 @@ DATE: 4/17/2026
         </table>
       {% endif %}
     </div>
+
+    <!-- Admin panel-->
+    {% if request.user == league.league_admin %}
+      <div class="column">
+      <h2>League Settings</h2>
+      <div class="admin-toolbar" id="leagueadmin">
+     
+        <a href="{% url 'create_game' pk=league.pk %}">🗓️ Schedule Games </a>
+        <a href="{% url 'check_league_requests' league.pk %}">📖 Check join requests </a>
+        <a href="{% url 'kick_teams' league.pk %}">🥾 Kick teams </a>
+      </div>
+      </div>
+    {% endif %}
   </div>
 
   <!-- Complted Games -->
@@ -90,13 +100,22 @@ DATE: 4/17/2026
       {% for game in completed_games %}
         <div class="card">
           <div class="game-card-header">
-            <p class="team-title">{{ game.team1.name }} vs. </p>
-            <p class="team-title">   {{ game.team2.name }}</p>
+            {% if game.team1.picture %}
+              <img src="{{ game.team1.getImageUrl }}" class="team-pfp">
+            {% else %}
+              <p class="team-pfp">❓</p>
+            {% endif %}
+            <p class="team-title">{{ game.team1.name }} vs. {{ game.team2.name }}</p> 
+            {% if game.team2.picture %}
+              <img src="{{ game.team2.getImageUrl }}" class="team-pfp">
+            {% else %}
+              <p class="team-pfp">❓</p>
+            {% endif %}
             {% if request.user == league.league_admin %}
-              <a href="{% url 'delete_game' game.pk %}">Delete</a>
+              <a href="{% url 'delete_game' game.pk %}" class="delete-game">Delete</a>
             {% endif %}
             {% if is_member and time > game.time %}
-              <a href="{% url 'finalize_score' game.pk %}">Finalize Score</a>
+              <a href="{% url 'finalize_score' game.pk %}" class="finalize-game">Finalize Score</a>
             {% endif %}
           </div>
           <p class="dates">{{ game.time }}</p>
@@ -131,6 +150,9 @@ DATE: 4/17/2026
   
 
   <h2>Feed</h2>
+  {% if is_member %}
+    <a href="{% url 'create_league_post' league.pk %}" class="button">✍️Create post</a>
+  {% endif %}
   {% if posts %}
     <!-- Iterate thru posts & attach images if available-->
     {% for post in posts %}

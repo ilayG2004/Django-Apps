@@ -15,7 +15,7 @@
       </div>
     </a>
   {% endfor %}
-  <h2>Active Teams</h2>
+  <h2>Teams</h2>
   {% for team in teams %}
    <a href="{% url 'detail_team' team.pk %}">
       <div class="card">
@@ -27,7 +27,9 @@
     </a>
   {% endfor %}
 
-  <div class="tool-bar">
-    <a href="{% url 'create_team' %}"> Create a team </a>
+  <h2>Start a team</h2>
+  <div class="column">
+    <p>Want to manage a team and recruit friends?</p>
+    <a href="{% url 'create_team' %}" class="button"> Create a team </a>
   </div>
 {% endblock %}

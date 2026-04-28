@@ -2,19 +2,20 @@
 
 {% block content %}
   <h2>Kick Members from {{ team.name }}</h2>
+  <a href="{% url 'detail_team' team.pk %}">Back</a>
+  <div class="form-container">
+    <form method="post">
+      {% csrf_token %}
+      {% for member in members %}
+        <div>
+          <label>
+            <input type="checkbox" name="members" value="{{ member.id }}">
+            {{ member.user.username }}
+          </label>
+        </div>
+      {% endfor %}
 
-  <form method="post">
-    {% csrf_token %}
-
-    {% for member in members %}
-      <div>
-        <label>
-          <input type="checkbox" name="members" value="{{ member.id }}">
-          {{ member.user.username }}
-        </label>
-      </div>
-    {% endfor %}
-
-    <button type="submit">Remove Selected Members</button>
-  </form>
+      <button type="submit">Remove Selected Members</button>
+    </form>
+  </div>
 {% endblock %}

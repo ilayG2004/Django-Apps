@@ -2,19 +2,21 @@
 
 {% block content %}
   <h2>Kick Teams from {{ league.name }}</h2>
+  <a href="{% url 'detail_league' league.pk %}">Back</a>
+  <div class="form-container">
+    <form method="post">
+      {% csrf_token %}
 
-  <form method="post">
-    {% csrf_token %}
+      {% for team in teams %}
+        <div>
+          <label>
+            <input type="checkbox" name="teams" value="{{ team.id }}">
+            {{ team.name }}
+          </label>
+        </div>
+      {% endfor %}
 
-    {% for team in teams %}
-      <div>
-        <label>
-          <input type="checkbox" name="teams" value="{{ team.id }}">
-          {{ team.name }}
-        </label>
-      </div>
-    {% endfor %}
-
-    <button type="submit">Remove Selected Teams</button>
-  </form>
+      <button type="submit">Remove Selected Teams</button>
+    </form>
+  </div>
 {% endblock %}

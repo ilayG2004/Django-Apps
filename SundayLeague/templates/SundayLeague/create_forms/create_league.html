@@ -5,12 +5,14 @@
   <p> Start a sports league and admit teams to join. 
     Add a competitiveness level and a description so teams no if this league is the right fit for them. </p>
   <p> NOTE: You will be designated the league admin. This role cannot be changed. You will be responsible for admitting new teams to the league. And scheduling games. </p>
-  <form method="POST" action="{% url 'create_league' %}">
-    {% csrf_token %}
-    <table>
-      {{form.as_table}}
-    </table>
+  <div class="form-container">
+    <form method="POST" action="{% url 'create_league' %}">
+      {% csrf_token %}
+      <table>
+        {{form.as_table}}
+      </table>
 
-    <input type="submit" name="submit" value="Create">
-  </form>
+      <input type="submit" name="submit" value="Create">
+    </form>
+  </div>
 {% endblock %}

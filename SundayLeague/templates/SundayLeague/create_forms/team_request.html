@@ -3,12 +3,15 @@
 {% block content %}
   <h2> Request to join a team. </h2>
   <p> Add a message so the team can get to know you. Requests will be approved or denied by this team's admin. Only the team admin can view your request. </p>
-  <form method="POST">
-    {% csrf_token %}w
-    <table>
-      {{form.as_table}}
-    </table>
+  <a href="{% url 'detail_team' team.pk %}">Back</a>
+  <div class="form-container">
+    <form method="POST">
+      {% csrf_token %}
+      <table>
+        {{form.as_table}}
+      </table>
 
-    <input type="submit" name="submit" value="Create">
-  </form>
+      <input type="submit" name="submit" value="Create">
+    </form>
+  </div>
 {% endblock %}

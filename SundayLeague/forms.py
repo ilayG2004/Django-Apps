@@ -1,6 +1,24 @@
+"""
+FILE: SundayLeague/forms.py
+AUTHOR: Ilay Guler (ilay2004@bu.edu)
+DESCRIPTION: Django forms for CRUD operations on data model instances. Utilized in views.py.
+DATE: 4/17/2026
+"""
 from django import forms
 from .models import *
+from django.contrib.auth.forms import UserCreationForm
 
+
+# ------------- User + SLProfile Creation ----------
+class UserRegisterForm(UserCreationForm):
+  """ Takes the usual django user registration forms, but also includes fields for an SLProfile """
+  email = forms.EmailField(required=True)
+  bio = forms.CharField(required=False)
+  profile_picture = forms.ImageField(required=False)
+
+  class Meta:
+      model = User
+      fields = ['username', 'email', 'password1', 'password2', 'bio', 'profile_picture']
 
 # ------------- Create Forms -----------------------
 

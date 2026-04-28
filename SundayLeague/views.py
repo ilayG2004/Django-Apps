@@ -10,13 +10,12 @@ from .models import *
 from .forms import *
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.contrib.auth import login
 from django.db.models import Q, Count, F
+from django.db import transaction
 from django.urls import reverse
-from django.contrib.auth.views import LogoutView
-from django.urls import reverse_lazy
 from django.http import HttpResponseForbidden, HttpResponse
 from django.utils import timezone
-from datetime import datetime
 from django.contrib import messages
 
 
@@ -31,7 +30,8 @@ def is_in_league(user, league):
   return is_member
 
 
-# Create your views here.
+# ------------- Genric Views ----------------
+
 class ListLeagues(ListView):
   """ View to list active leagues """
   model=League
@@ -200,7 +200,7 @@ class ListTeams(ListView):
         return queryset
   
 
-"""---------- Log-in User Tabs -----------------"""
+# ------------- Login User Tabs -----------------
   
 class MyTeams(LoginRequiredMixin, ListView):
   """ View to display teams for a user """
@@ -360,19 +360,43 @@ class MyGames(LoginRequiredMixin, ListView):
       )
       return context
 
+# ---------- Custom Authentication Handling -----------
+
 class CustomLoginView(LoginView):
-    template_name = 'SundayLeague/login.html'
+  template_name = 'SundayLeague/login.html'
 
-    def get_success_url(self):
-        # If ?next= exists, respect it (important!)
-        next_url = self.request.GET.get('next')
-        if next_url:
-            return next_url
+  def get_success_url(self):
+      # If ?next= exists, respect it (important! for redirecting after a failed LoginRequiredMixin)
+      next_url = self.request.GET.get('next')
+      if next_url:
+          return next_url
 
-        # Otherwise redirect to user's profile
-        profile = self.request.user.slprofile
-        return reverse('detail_profile', kwargs={'pk': profile.pk})
-    
+      # Otherwise redirect to user's profile
+      profile = self.request.user.slprofile
+      return reverse('detail_profile', kwargs={'pk': profile.pk})
+
+def register(request):
+  if request.method == "POST":
+      form = UserRegisterForm(request.POST, request.FILES)
+
+      if form.is_valid():
+          with transaction.atomic():
+              # Ensures both the django user and SLProfile are created safely
+              user = form.save()
+
+              SLProfile.objects.create(
+                  user=user,
+                  bio=form.cleaned_data.get('bio', ''),
+                  profile_picture=form.cleaned_data.get('profile_picture')
+              )
+
+          login(request, user)
+          return redirect("home")
+
+  else:
+      form = UserRegisterForm()
+
+  return render(request, "SundayLeague/registration/register.html", {"form": form})
 
 # ------ Create Forms ------------
 class CreateLeague(LoginRequiredMixin, CreateView):
@@ -466,6 +490,12 @@ class CreateTeamJoinRequest(LoginRequiredMixin, CreateView):
   form_class = CreateTeamJoinRequestForm
   template_name = 'SundayLeague/create_forms/team_request.html'
 
+  def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+    team = get_object_or_404(Team, pk=self.kwargs.get('pk'))
+    context['team'] = team
+    return context
+
   def form_valid(self, form):
     user = self.request.user
     team_pk = self.kwargs.get('pk')
@@ -528,6 +558,12 @@ class CreateLeagueJoinRequest(LoginRequiredMixin, CreateView):
   model=LeagueJoinRequest
   form_class = CreateLeagueJoinRequestForm
   template_name = 'SundayLeague/create_forms/league_request.html'
+
+  def get_context_data(self, **kwargs):
+     context = super().get_context_data(**kwargs)
+     league = get_object_or_404(League, pk=self.kwargs.get('pk'))
+     context['league'] = league
+     return context
 
   def get_form(self, form_class=None):
     """ Dropdown menu for team selection will only be teams this user is admin of """
@@ -696,6 +732,7 @@ class DeleteLeagueRequest(LoginRequiredMixin, View):
 class DeleteGame(LoginRequiredMixin, DeleteView):
    model = Game
    template_name='SundayLeague/delete_forms/delete_game.html'
+   
    def dispatch(self, request, *args, **kwargs):
     game = self.get_object()
 
@@ -834,6 +871,14 @@ class FinalizeScore(LoginRequiredMixin, UpdateView):
    model=Game
    form_class = FinalizeScoreForm
    template_name = 'SundayLeague/update_forms/finalize_score.html'
+
+   def get_context_data(self, **kwargs):
+      context = super().get_context_data(**kwargs)
+      game = self.get_object()
+      league = game.league
+      context['game'] = game
+      context['league'] = league
+      return context
    
    def dispatch(self, request, *args, **kwargs):
     game = self.get_object()

@@ -13,13 +13,7 @@ DATE: 4/17/2026
   </head>
   <html>
     {% if user.is_authenticated %}
-      <p>Welcome, {{ user.username }}</p>
-      <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <input type="submit" value="Logout">
-      </form>
-    {% else %}
-      <a href="{% url 'login' %}">Login</a>
+      <p>Welcome, {{ user.username }}</p> 
     {% endif %}
     <h1>Terrier Sunday League</h1>
     <h4> Play hard, have fun. </h4>
@@ -29,9 +23,20 @@ DATE: 4/17/2026
         <a href="{% url 'my_leagues' %}">My Leagues</a>
         <a href="{% url 'my_teams' %}">My Teams</a>
         <a href="{% url 'my_games' %}">My Games</a>
-       {% endif %}
-      <a href="{% url 'list_leagues' %}">Discover Leagues</a>
-      <a href="{% url 'list_teams' %}">Join teams</a>
+        <a href="{% url 'list_leagues' %}">Discover Leagues</a>
+        <a href="{% url 'list_teams' %}">Join teams</a>
+        <form method="POST" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <input type="submit" value="Logout">
+        </form>
+
+      {% else %}
+        <a href="{% url 'list_leagues' %}">Discover Leagues</a>
+        <a href="{% url 'list_teams' %}">Join teams</a>
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'register' %}">Register</a>
+      {% endif %}
+      
     </div>
     <hr>
     {% block content %}

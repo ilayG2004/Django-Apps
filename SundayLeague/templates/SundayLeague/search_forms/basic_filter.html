@@ -5,6 +5,7 @@ DATE: 4/21/2026
 
 -->
 {% block content %}
+<div class="search-bar">
   <form method="GET">
     <label>Sport:</label>
     <input type="text" name="sport" placeholder="e.g. Volleyball" value="{% if request.GET.sport %}{{ request.GET.sport }}{% endif %}">
@@ -18,10 +19,11 @@ DATE: 4/21/2026
     <label>End Date:</label>
     <input type="date" name="end_date" value="{% if request.GET.end_date %}{{ request.GET.end_date }}{% endif %}">
 
-    <label>Name:</label>c
+    <label>Name:</label>
     <input type="text" name="name" value="{% if request.GET.name %}{{ request.GET.name }}{% endif %}">
 
     <button type="submit">Filter</button>
     <a href="{{ request.path }}">Reset</a>
   </form>
+</div>
 {% endblock %}

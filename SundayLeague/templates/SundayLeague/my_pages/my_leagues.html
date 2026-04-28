@@ -40,7 +40,10 @@
       </div>
     </a>
   {% endfor %}
-  <div class="tool-bar">
-    <a href="{% url 'create_league' %}"> Start a league </a>
+  
+  <h2>Start a league</h2>
+  <div class="column">
+    <p>Want to gather teams and organize matches?</p>
+    <a href="{% url 'create_league' %}" class="button"> Start a league </a>
   </div>
 {% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2> Register to Sunday League </h2>
+  <p>Create a profile, request to join teams, and your teams will join organized sports leagues.</p>
+    <div class="form-container">
+    <form method="POST">
+      {% csrf_token %}
+      <table>
+        {{form.as_table}}
+      </table>
+
+      <input type="submit" name="submit" value="Create">
+    </form>
+  </div>
+{% endblock %}
