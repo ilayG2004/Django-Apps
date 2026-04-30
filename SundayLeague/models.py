@@ -47,7 +47,7 @@ class SLProfile(models.Model):
       return 'unknown user'
 
 class League(models.Model):
-
+  # An intermural sport league. The admin can schedule matches and delete them. Community members can finalize scores
   SPORT_CHOICES = [
         ("BB", "Basketball"),
         ("BM", "Badminton"),

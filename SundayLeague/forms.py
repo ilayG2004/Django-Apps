@@ -89,6 +89,7 @@ class CreateTeamJoinRequestForm(forms.ModelForm):
     fields=['message']
 
 class CreateLeagueJoinRequestForm(forms.ModelForm):
+  """ Create a join request on behalf of a team to a league """
   class Meta:
     model=LeagueJoinRequest
     fields=['requesting_team', 'message']
@@ -113,6 +114,7 @@ class CreateUpvoteForm(forms.ModelForm):
 
 # -------------- Update forms -----------
 class UpdateTeamForm(forms.ModelForm):
+  """ Update team biographical information """
   class Meta:
     model=Team
     fields=['name','picture','bio']

@@ -20,6 +20,7 @@ from django.contrib import messages
 
 
 def is_in_league(user, league):
+  """ Authentication method to ensure a user is in a team participating in the queried league """
   is_member = False
   if user.is_authenticated:
     teams = Team.objects.filter(teammember__user=user)
@@ -46,6 +47,7 @@ class ListLeagues(ListView):
     return context
   
   def get_queryset(self):
+    """ Handles filtering leagues by certain query parameters """
     queryset = super().get_queryset()
 
     sport = self.request.GET.get('sport')
@@ -139,19 +141,8 @@ class TeamDetail(DetailView):
 
     return context
 
-class GameDetail(DetailView):
-  model=Game
-  template_name='SundayLeague/detail_game'
-  content_object_name='game'
-
-  """
-  Simply display the teams. The time. Who won who lost if applicable.
-  Add some logic that if the time for the game passed, and there was no update on the winner or score, render a 'Finalize' button for users who are part of the team, to fill out and update the info
-  Requires a GameEdit form
-  """
-
 class ProfileDetail(DetailView):
-  """ View to list a profile """
+  """ View to show a profile """
   model=SLProfile
   template_name='SundayLeague/detail_profile.html'
   content_object_name='profile'
@@ -193,6 +184,7 @@ class ListTeams(ListView):
   context_object_name='teams'
 
   def get_queryset(self):
+        """ Handles filtering teams by certain query parameters """
         queryset = super().get_queryset()
 
         team_name = self.request.GET.get('name')
@@ -215,6 +207,7 @@ class MyTeams(LoginRequiredMixin, ListView):
   context_object_name = 'teams'
 
   def get_queryset(self):
+      """ Handles filtering teams by certain query parameters """
       profile = SLProfile.objects.get(user=self.request.user)
       queryset = profile.getTeams()
 
@@ -240,6 +233,7 @@ class MyLeagues(LoginRequiredMixin, ListView):
   context_object_name = 'leagues'
 
   def get_queryset(self):
+    """ Handles filtering leagues by certain query parameters """
     profile = SLProfile.objects.get(user=self.request.user)
     teams = profile.getTeams().values_list("id", flat=True)
     queryset = League.objects.filter(Q(teams__id__in=teams) |  Q(league_admin=self.request.user)).distinct()
@@ -293,6 +287,7 @@ class MyGames(LoginRequiredMixin, ListView):
     context_object_name = 'games'
 
     def get_queryset(self):
+        """ Handles filtering matches by certain query parameters """
         profile = SLProfile.objects.get(user=self.request.user)
 
         # Get user's teams (as queryset ideally)
@@ -352,6 +347,7 @@ class CustomLoginView(LoginView):
   template_name = 'SundayLeague/login.html'
 
   def get_success_url(self):
+      """ Redirects to the new user profile when done """
       # If ?next= exists, respect it (important! for redirecting after a failed LoginRequiredMixin)
       next_url = self.request.GET.get('next')
       if next_url:
@@ -362,6 +358,7 @@ class CustomLoginView(LoginView):
       return reverse('detail_profile', kwargs={'pk': profile.pk})
 
 def register(request):
+  """ Handles creation of SLProfile object alongside the authenticated django user signing up"""
   if request.method == "POST":
       form = UserRegisterForm(request.POST, request.FILES)
 
@@ -386,6 +383,7 @@ def register(request):
 
 # ------ CREATE FORMS ------------
 class CreateLeague(LoginRequiredMixin, CreateView):
+  """ View to create a new league """
   model=League
   form_class = CreateLeagueForm
   template_name = 'SundayLeague/create_forms/create_league.html'
@@ -401,6 +399,7 @@ class CreateLeague(LoginRequiredMixin, CreateView):
     return reverse('detail_league', kwargs={'pk': self.object.pk})
 
 class CreateGame(LoginRequiredMixin, CreateView):
+  """ View for a league admin to schedule a game """
   model=Game
   form_class = CreateGameForm
   template_name='SundayLeague/create_forms/create_game.html'
@@ -455,6 +454,7 @@ class CreateGame(LoginRequiredMixin, CreateView):
     return reverse('detail_league', kwargs={'pk': self.kwargs.get('pk')})
   
 class CreateTeam(LoginRequiredMixin, CreateView):
+  """ View to create a team """
   model=Team
   form_class = CreateTeamForm
   template_name = 'SundayLeague/create_forms/create_team.html'
@@ -475,6 +475,7 @@ class CreateTeam(LoginRequiredMixin, CreateView):
     return reverse('detail_team', kwargs={'pk': self.object.pk})
   
 class CreateTeamJoinRequest(LoginRequiredMixin, CreateView):
+  """ View for a user to create a team join request. Does not render html. Just handles backend stuff for post procesing """
   model=TeamJoinRequest
   form_class = CreateTeamJoinRequestForm
   template_name = 'SundayLeague/create_forms/team_request.html'
@@ -507,6 +508,7 @@ class CreateTeamJoinRequest(LoginRequiredMixin, CreateView):
   
 
 class CreateTeamMember(LoginRequiredMixin, View):
+  """ View for a team admin to add a team member from a team join request. Does not render html. Just handles backend stuff for post procesing """
   def post(self, request, team_pk, user_to_join):
     team = get_object_or_404(Team, pk=team_pk)
 
@@ -543,6 +545,7 @@ class CreateTeamMember(LoginRequiredMixin, View):
     return redirect('check_team_requests', pk=team.pk)
 
 class CreateLeagueJoinRequest(LoginRequiredMixin, CreateView):
+  """ View for a team admin to create a league join request. Does not render html. Just handles backend stuff for post procesing """
   model=LeagueJoinRequest
   form_class = CreateLeagueJoinRequestForm
   template_name = 'SundayLeague/create_forms/league_request.html'
@@ -584,6 +587,7 @@ class CreateLeagueJoinRequest(LoginRequiredMixin, CreateView):
 
 
 class CreateLeagueMember(LoginRequiredMixin, View):
+   """ View for a league admin to admit a team. Does not render html. Just handles backend stuff for post procesing """
    def post(self, request, league_pk, team_to_join):
     league = get_object_or_404(League, pk=league_pk)
 
@@ -625,6 +629,7 @@ class CreateLeagueMember(LoginRequiredMixin, View):
     return redirect('check_league_requests', pk=league.pk)
    
 class CreateLeaguePost(LoginRequiredMixin, CreateView):
+   """ View for a user on a team in a league to make a league post """
    model=LeaguePost
    form_class=CreateLeaguePostForm
    template_name = 'SundayLeague/create_forms/create_league_post.html'
@@ -722,6 +727,7 @@ class CreateUpvote(LoginRequiredMixin, CreateView):
 # ------------- DELETE VIEWS ----------------------
   
 class DeleteTeamRequest(LoginRequiredMixin, View):
+  """ View for a team admin to delete a league join request from a user. Does not render html. Just handles backend stuff for post procesing """
   def post(self, request, team_pk, user_to_join):
     team = get_object_or_404(Team, pk=team_pk)
 
@@ -749,6 +755,7 @@ class DeleteTeamRequest(LoginRequiredMixin, View):
     return redirect('check_team_requests', pk=team.pk)
   
 class DeleteLeagueRequest(LoginRequiredMixin, View):
+  """ View for a league admin to delete a league join request from a team. Does not render html. Just handles backend stuff for post procesing """
   def post(self, request, league_pk, team_to_join):
     league = get_object_or_404(League, pk=league_pk)
 
@@ -778,6 +785,7 @@ class DeleteLeagueRequest(LoginRequiredMixin, View):
 
 
 class DeleteGame(LoginRequiredMixin, DeleteView):
+   """ View for a league admin to delete a game from their league. Completed or not. """
    model = Game
    template_name='SundayLeague/delete_forms/delete_game.html'
    
@@ -794,6 +802,7 @@ class DeleteGame(LoginRequiredMixin, DeleteView):
 
 
 class KickMembersView(LoginRequiredMixin, View):
+    """ View for a team admin to kick members from their team """
     template_name = 'SundayLeague/delete_forms/kick_members.html'
 
     def get(self, request, pk):
@@ -835,6 +844,7 @@ class KickMembersView(LoginRequiredMixin, View):
 
 
 class KickTeams(LoginRequiredMixin, View):
+   """ View for a league admin to kick teams from a league """
    template_name = 'SundayLeague/delete_forms/kick_teams.html'
    
    def get(self, request, pk):
@@ -872,6 +882,7 @@ class KickTeams(LoginRequiredMixin, View):
 
 # ---------- EDIT FORMS ------------------
 class EditTeam(LoginRequiredMixin, UpdateView):
+  """ View for a team admin to edit team biographical info """
   model = Team
   form_class = UpdateTeamForm
   template_name = 'SundayLeague/update_forms/update_team.html'
@@ -885,6 +896,7 @@ class EditTeam(LoginRequiredMixin, UpdateView):
 
 
 class CheckTeamRequests(LoginRequiredMixin, View):
+  """ View for a team admin to check requests from users """
   template_name = 'SundayLeague/update_forms/check_team_requests.html'
 
   def get(self, request, pk):
@@ -901,6 +913,7 @@ class CheckTeamRequests(LoginRequiredMixin, View):
     })
   
 class CheckLeagueRequests(LoginRequiredMixin, View):
+   """ View for a league admin to check teams requesting to join their league """
    template_name = 'SundayLeague/update_forms/check_league_requests.html'
 
    def get(self, request, pk):
@@ -916,6 +929,7 @@ class CheckLeagueRequests(LoginRequiredMixin, View):
       })
 
 class FinalizeScore(LoginRequiredMixin, UpdateView):
+   """ View for a user on a team in a league to finalize the score of a match who's scheduled play-time has passed """
    model=Game
    form_class = FinalizeScoreForm
    template_name = 'SundayLeague/update_forms/finalize_score.html'
@@ -950,6 +964,7 @@ class FinalizeScore(LoginRequiredMixin, UpdateView):
     return reverse('detail_league', kwargs={'pk': self.object.league.pk})
    
 class EditProfile(LoginRequiredMixin, UpdateView):
+   """ View for a user to edit their social profile """
    model=SLProfile
    form_class=UpdateProfileForm
    template_name = 'SundayLeague/update_forms/update_profile.html'
