@@ -1,0 +1,18 @@
+<!--
+AUTHOR: Ilay Guler (ilay2004@bu.edu)
+DESCRIPTION: Form for overriding get queryset in most views. Uses a context variable which decides which filters are to be applied. 
+DATE: 4/21/2026
+
+-->
+{% block content %}
+<div class="search-bar">
+  <form method="GET">
+  
+    <label>Name:</label>
+    <input type="text" name="name" value="{% if request.GET.name %}{{ request.GET.name }}{% endif %}">
+
+    <button type="submit">Filter</button>
+    <a href="{{ request.path }}">Reset</a>
+  </form>
+</div>
+{% endblock %}

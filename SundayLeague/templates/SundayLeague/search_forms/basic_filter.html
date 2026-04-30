@@ -8,7 +8,14 @@ DATE: 4/21/2026
 <div class="search-bar">
   <form method="GET">
     <label>Sport:</label>
-    <input type="text" name="sport" placeholder="e.g. Volleyball" value="{% if request.GET.sport %}{{ request.GET.sport }}{% endif %}">
+<select name="sport">
+  <option value="">All</option>
+  {% for code, label in sport_choices %}
+    <option value="{{ code }}" {% if request.GET.sport == code %}selected{% endif %}>
+      {{ label }}
+    </option>
+  {% endfor %}
+  </select> 
 
     <label>Level:</label>
     <input type="text" name="level" placeholder="e.g. Beginner" value="{% if request.GET.level %}{{ request.GET.level }}{% endif %}">

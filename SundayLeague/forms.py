@@ -18,7 +18,7 @@ class UserRegisterForm(UserCreationForm):
 
   class Meta:
       model = User
-      fields = ['username', 'email', 'password1', 'password2', 'bio', 'profile_picture']
+      fields = ['username', 'email', 'password1', 'password2', 'first_name', 'bio', 'profile_picture']
 
 # ------------- Create Forms -----------------------
 
@@ -93,6 +93,23 @@ class CreateLeagueJoinRequestForm(forms.ModelForm):
     model=LeagueJoinRequest
     fields=['requesting_team', 'message']
 
+class UpdateUpvote(forms.ModelForm):
+  """ Creates an upvote from one teammate to another """
+  class Meta:
+    model = Upvote
+    fields = ['vote_type']
+
+class CreateUpvoteForm(forms.ModelForm):
+  """ Creates a teammates upvote """
+  """ 
+    I want this to be one form for now. One upvote can be given per teammate-user relationship 
+    So in post-processing if a new upvote object is created and one already exists between this teammate-user, we delete the old one
+    Ideally I would have some kind of reward mechanism, like after a match, give each team player one vote to bestow upon a teammate, but I do not have time to add more logic and another data model.
+  """
+  class Meta:
+    model = Upvote
+    fields = ['vote_type']
+
 
 # -------------- Update forms -----------
 class UpdateTeamForm(forms.ModelForm):
@@ -105,3 +122,9 @@ class FinalizeScoreForm(forms.ModelForm):
   class Meta:
     model=Game
     fields=['winner', 'final_score']
+
+class UpdateProfileForm(forms.ModelForm):
+  """ Updates profile bio or pfp """
+  class Meta:
+    model = SLProfile
+    fields = ['bio', 'profile_picture']

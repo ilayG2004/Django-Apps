@@ -3,7 +3,7 @@
 {% block content %}
   <h2>Discover Teams</h2>
   <h3>Teams looking for new members.</h3>
-  {% include 'SundayLeague/search_forms/basic_filter.html' %}
+  {% include 'SundayLeague/search_forms/team_query.html' %}
   {% for team in teams %}
   <a href="{% url 'detail_team' team.pk %}">
     <div class="card">
@@ -11,9 +11,8 @@
           <img src="{{team.getImageUrl}}" class="team-pfp">
           <p class="league-title">{{team.name}}</p>
         </div>
-        <p class="type-text">Sport: {{team.league.sport_type}}</p>
-        <p class="seriousness">Level: {{team.league.level}}</p>
-        <p class="dates">{{team.league.season_start}} - {{team.league.season_end}}</p>
+        <p class="type-text">Members: {{team.getTeamMembers|length}}</p>
+        <p class="seriousness">Bio: {{team.bio}}</p>
     </div>
   </a>
   {% endfor %}

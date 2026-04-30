@@ -1,12 +1,9 @@
 {% extends 'SundayLeague/base.html' %}
 
 {% block content %}
+  <a href="{% url 'detail_league' league.pk %}" class="button">⬅️Back</a>
   {% if requests|length %}
-    {% if messages %}
-      <div class="alert alert-success">
-        {{ messages.0 }}
-      </div>
-    {% endif %}
+    
     <a href="{% url 'detail_league' league.pk %}">Back</a>
     {% for req in requests.all %}
       <div>

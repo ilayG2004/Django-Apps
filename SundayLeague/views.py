@@ -38,6 +38,13 @@ class ListLeagues(ListView):
   template_name='SundayLeague/list_leagues.html'
   context_object_name='leagues'
 
+  def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+
+    context['sport_choices'] = League.SPORT_CHOICES
+
+    return context
+  
   def get_queryset(self):
     queryset = super().get_queryset()
 
@@ -54,7 +61,7 @@ class ListLeagues(ListView):
     queryset = queryset.filter(team_count__lt=F('max_teams'))
 
     if sport:
-      queryset = queryset.filter(sport_type__icontains=sport)
+      queryset = queryset.filter(sport_type=sport)
 
     if level:
       queryset = queryset.filter(level__icontains=level)
@@ -76,21 +83,22 @@ class DetailLeague(DetailView):
   context_object_name='league'
 
   def get_context_data(self, **kwargs):
-    """ Retreives all data to display for a league page. Including games, teams, win/losses of teams, and feed posts. """
     league = League.objects.get(pk=self.kwargs['pk'])
 
-    is_member = is_in_league(self.request.user, league)
-    
+    user = self.request.user
+
+    is_member = False
     is_some_team_admin = False
-    managing_teams = Team.objects.filter(team_admin=self.request.user)
-    if len(managing_teams) > 0:
-       is_some_team_admin = True
-    
+
+    if user.is_authenticated:
+        is_member = is_in_league(user, league)
+        is_some_team_admin = Team.objects.filter(team_admin=user).exists()
 
     games = league.getGames()
     upcoming_games = games.exclude(winner__isnull=False)
     completed_games = games.exclude(winner__isnull=True)
-    context = {
+
+    return {
         "league": league,
         "upcoming_games": upcoming_games,
         "completed_games": completed_games,
@@ -101,7 +109,6 @@ class DetailLeague(DetailView):
         "is_some_team_admin": is_some_team_admin,
         "time": timezone.now()
     }
-    return context
 
 class TeamDetail(DetailView):
   """ View to display a team's detailed page """
@@ -157,15 +164,26 @@ class ProfileDetail(DetailView):
     context = super().get_context_data(**kwargs)
     profile = self.object
     context['profile'] = profile
-    upvotes = profile.getUpvotes()
-    aggregate = {}
-    for upvote in upvotes:
-      if upvote.vote_type not in aggregate:
-        aggregate[upvote.vote_type] = 1
-      else:
-        aggregate[upvote.vote_type] += 1
-    context["upvotes"] = aggregate
+
+    upvotes = (
+        profile.getUpvotes()
+        .values('vote_type')
+        .annotate(count=Count('id'))
+        .order_by()  # removes default ordering noise
+    )
+    # attach human-readable labels
+    choice_map = dict(Upvote.UPVOTE_TYPES)
+    for row in upvotes:
+        row['label'] = choice_map[row['vote_type']]
+    context["upvotes"] = upvotes
+
+
     context["teams"] = profile.getTeams()
+    context['is_teammate'] = False
+    if self.request.user.is_authenticated:
+      viewing_profile = get_object_or_404(SLProfile, user=self.request.user)
+      print("Viewing profile",viewing_profile)
+      context['is_teammate'] = profile.isTeamMate(viewing_profile)
     return context
   
 class ListTeams(ListView):
@@ -177,26 +195,11 @@ class ListTeams(ListView):
   def get_queryset(self):
         queryset = super().get_queryset()
 
-        sport = self.request.GET.get('sport')
-        level = self.request.GET.get('level')
-        start_date = self.request.GET.get('start_date')
-        end_date = self.request.GET.get('end_date')
         team_name = self.request.GET.get('name')
-
-        if sport:
-          queryset = queryset.filter(league__sport_type__icontains=sport)
-
-        if level:
-          queryset = queryset.filter(league__level__icontains=level)
-
-        if start_date:
-          queryset = queryset.filter(league__season_start__gte=start_date)
-        
-        if end_date:
-          queryset = queryset.filter(league__season_end__lte=end_date)
 
         if team_name:
           queryset = queryset.filter(name__icontains=team_name)
+
         return queryset
   
 
@@ -215,23 +218,7 @@ class MyTeams(LoginRequiredMixin, ListView):
       profile = SLProfile.objects.get(user=self.request.user)
       queryset = profile.getTeams()
 
-      sport = self.request.GET.get('sport')
-      level = self.request.GET.get('level')
-      start_date = self.request.GET.get('start_date')
-      end_date = self.request.GET.get('end_date')
       team_name = self.request.GET.get('name')
-
-      if sport:
-        queryset = queryset.filter(leagues__sport_type__icontains=sport)
-
-      if level:
-        queryset = queryset.filter(leagues__level__icontains=level)
-
-      if start_date:
-        queryset = queryset.filter(leagues__season_start__gte=start_date)
-      
-      if end_date:
-        queryset = queryset.filter(leagues__season_end__lte=end_date)
 
       if team_name:
         queryset = queryset.filter(name__icontains=team_name)
@@ -255,7 +242,7 @@ class MyLeagues(LoginRequiredMixin, ListView):
   def get_queryset(self):
     profile = SLProfile.objects.get(user=self.request.user)
     teams = profile.getTeams().values_list("id", flat=True)
-    queryset = League.objects.filter(teams__id__in=teams).distinct()
+    queryset = League.objects.filter(Q(teams__id__in=teams) |  Q(league_admin=self.request.user)).distinct()
 
     print("USER:", self.request.user)
     print("TEAMS:", teams)
@@ -269,7 +256,7 @@ class MyLeagues(LoginRequiredMixin, ListView):
     league_name = self.request.GET.get('name')
 
     if sport:
-      queryset = queryset.filter(sport_type__icontains=sport)
+      queryset = queryset.filter(sport_type=sport)
 
     if level:
       queryset = queryset.filter(level__icontains=level)
@@ -292,8 +279,7 @@ class MyLeagues(LoginRequiredMixin, ListView):
       context['managing'] = leagues.filter(league_admin = self.request.user)
       context['active'] = leagues.filter(season_start__lte=now, season_end__gte=now)
       context['previous'] = leagues.filter(season_end__lt=now)
-      print("LEAGUES ACTIVE:", context['active'])
-      print("LEAGUES PREVIOUS:", context['previous'])
+      context['sport_choices'] = League.SPORT_CHOICES
       return context
     
     
@@ -398,7 +384,7 @@ def register(request):
 
   return render(request, "SundayLeague/registration/register.html", {"form": form})
 
-# ------ Create Forms ------------
+# ------ CREATE FORMS ------------
 class CreateLeague(LoginRequiredMixin, CreateView):
   model=League
   form_class = CreateLeagueForm
@@ -418,7 +404,10 @@ class CreateGame(LoginRequiredMixin, CreateView):
   model=Game
   form_class = CreateGameForm
   template_name='SundayLeague/create_forms/create_game.html'
-
+  def get_context_data(self, **kwargs):
+     context = super().get_context_data(**kwargs)
+     context['league'] = get_object_or_404(League, pk=self.kwargs['pk'])
+     return context
   def get_form(self, form_class=None):
     """ Dropdown menu for team selection will only be teams in this league """
     form = super().get_form(form_class)
@@ -500,7 +489,6 @@ class CreateTeamJoinRequest(LoginRequiredMixin, CreateView):
     user = self.request.user
     team_pk = self.kwargs.get('pk')
     team = Team.objects.get(pk=team_pk)
-
     # Prevent duplicate request BEFORE saving
     if TeamJoinRequest.objects.filter(requesting_user=user, team=team).exists():
         messages.success(self.request, "Already requested to join this team. Request pending.")
@@ -641,6 +629,11 @@ class CreateLeaguePost(LoginRequiredMixin, CreateView):
    form_class=CreateLeaguePostForm
    template_name = 'SundayLeague/create_forms/create_league_post.html'
    
+   def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+    league = get_object_or_404(League, pk=self.kwargs.get('pk'))
+    context['league'] = league
+    return context
 
    def dispatch(self, request, *args, **kwargs):
     """Security to make sure a user who enters the link is actually part of the league they're posting to"""
@@ -670,6 +663,61 @@ class CreateLeaguePost(LoginRequiredMixin, CreateView):
    def get_success_url(self):
       return reverse('detail_league', kwargs={'pk': self.object.league.pk})
 
+class CreateUpvote(LoginRequiredMixin, CreateView):
+    """ Creates an upvote from one user to their teammate """
+    model = Upvote
+    form_class = CreateUpvoteForm
+    template_name = 'SundayLeague/create_forms/create_upvote.html'
+
+    def dispatch(self, request, *args, **kwargs):
+      """ Ensures a user is not trying to vote for another user who is not on a team with them """
+      voting_user = request.user
+      receiving_profile = get_object_or_404(SLProfile, pk=kwargs['pk'])
+    
+      voting_profile = get_object_or_404(SLProfile, user=voting_user)
+      print("VOTING USER:", voting_profile)
+      print("RECEIVING USER:", receiving_profile)
+      # Prevent self-voting (you probably want this)
+      if voting_profile == receiving_profile:
+          return HttpResponseForbidden("You cannot upvote yourself.")
+
+      # Teammate check
+      if not voting_profile.isTeamMate(receiving_profile):
+          return HttpResponseForbidden("You can only upvote your teammates.")
+
+      return super().dispatch(request, *args, **kwargs)
+
+    def get_receiving_user(self):
+      # assuming URL like: path('upvote/<int:pk>/...', ...)
+      receiving_profile = SLProfile.objects.get(pk=self.kwargs['pk'])
+      return receiving_profile.user
+
+    def form_valid(self, form):
+      voting_user = self.request.user
+      receiving_user = self.get_receiving_user()
+
+      # Delete existing upvote if it exists
+      Upvote.objects.filter(
+          voting_user=voting_user,
+          receiving_user=receiving_user
+      ).delete()
+
+      # Assign users to the new upvote
+      form.instance.voting_user = voting_user
+      form.instance.receiving_user = receiving_user
+
+      return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+      context = super().get_context_data(**kwargs)
+      profile = get_object_or_404(SLProfile, pk=self.kwargs.get('pk'))
+      context['profile'] = profile
+      return context
+
+    def get_success_url(self):
+      # Redirect back to receiving user's profile
+      return reverse('detail_profile', kwargs={'pk': self.kwargs['pk']})
+    
 
 # ------------- DELETE VIEWS ----------------------
   
@@ -889,6 +937,7 @@ class FinalizeScore(LoginRequiredMixin, UpdateView):
         return HttpResponseForbidden("You are not allowed to edit this game.")
 
     return super().dispatch(request, *args, **kwargs)
+   
    def get_form(self, form_class=None):
     """ Dropdown menu for team selection will only be teams playing this game """
     form = super().get_form(form_class)
@@ -899,3 +948,27 @@ class FinalizeScore(LoginRequiredMixin, UpdateView):
 
    def get_success_url(self):
     return reverse('detail_league', kwargs={'pk': self.object.league.pk})
+   
+class EditProfile(LoginRequiredMixin, UpdateView):
+   model=SLProfile
+   form_class=UpdateProfileForm
+   template_name = 'SundayLeague/update_forms/update_profile.html'
+   
+   def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+    profile = self.get_object()
+    context['profile'] = profile
+    return context  
+
+   def dispatch(self, request, *args, **kwargs):
+    """ Ensure an outside user is not trying to access an edit profile form for not themselves """
+    profile = self.get_object()
+
+    if not self.request.user == profile.user:
+        return HttpResponseForbidden("You are not allowed to edit this profile.")
+
+    return super().dispatch(request, *args, **kwargs)
+   
+
+   def get_success_url(self):
+    return reverse('detail_profile', kwargs={'pk': self.object.pk})

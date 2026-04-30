@@ -4,6 +4,7 @@
   <h2> Create a game </h2>
   <p> Schedules a game between two teams in your league. </p>
   <p> NOTE: You, or members of the team can upload the final score and declare a winner after the scheduled time for the game has passed. </p>
+  <a href="{% url 'detail_league' league.pk %}" class="button">⬅️Back</a>
   <div class="form-container">
     <form method="POST">
       {% csrf_token %}

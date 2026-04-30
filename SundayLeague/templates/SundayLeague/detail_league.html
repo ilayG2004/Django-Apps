@@ -7,7 +7,7 @@ DATE: 4/17/2026
 {% extends 'SundayLeague/base.html' %}
 
 {% block content %}
-
+  
   {% if not is_member and is_some_team_admin %}
     <a href="{% url 'create_league_request' league.pk %}" class="button">📝 Request your team to join</a>
   {% endif %}

@@ -3,8 +3,9 @@
 {% block content %}
   <h2> Create a post </h2>
   <p> Connect with athletes across teams. Make a post! </p>
+  <a href="{% url 'detail_league' league.pk %}" class="button">⬅️Back</a>
   <div class="form-container">
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <table>
         {{form.as_table}}

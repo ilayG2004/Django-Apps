@@ -25,6 +25,8 @@ urlpatterns = [
   path('my_leagues/', MyLeagues.as_view(), name='my_leagues'),
   path('my_teams/', MyTeams.as_view(), name='my_teams'),
   path('my_games/', MyGames.as_view(), name='my_games'),
+  path('edit_profile/<int:pk>/', EditProfile.as_view(), name='edit_profile'),
+  path('give_upvote/<int:pk>/', CreateUpvote.as_view(), name='give_upvote'),
 
   # User creation of league or teams
   path('create_league/', CreateLeague.as_view(), name='create_league'),

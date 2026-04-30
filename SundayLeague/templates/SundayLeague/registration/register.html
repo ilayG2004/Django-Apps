@@ -2,15 +2,31 @@
 
 {% block content %}
   <h2> Register to Sunday League </h2>
-  <p>Create a profile, request to join teams, and your teams will join organized sports leagues.</p>
-    <div class="form-container">
-    <form method="POST">
-      {% csrf_token %}
-      <table>
-        {{form.as_table}}
-      </table>
+  <div class="two-container">
+    <div class="one-third">
+      <div class="admin-toolbar">
+        <h3>What is Sunday League?</h3>
+        <ul>
+          <li>Sunday League is a way for community members to organize intermural sports leagues, and get to know the athletes you're playing with. </li>
+          <li>Registered users can join teams, or create teams of their own. </li>
+          <li>Registered users can create a sports league for a wide variety of sports. </li>
+          <li>Team admins can sign their team up to join a league, and participate in games scheduled by the league admin. </li>
+          <li>Members of a league can post pictures and messages whenever, and get to know each other.</li>
+          <li>Members of the same team can reward each other with upvotes for their skills during a match.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="two-thirds">
+      <div class="form-container">
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <table>
+            {{form.as_table}}
+          </table>
 
-      <input type="submit" name="submit" value="Create">
-    </form>
-  </div>
+          <input type="submit" name="submit" value="Create">
+        </form>
+      </div>
+    </div>
+    
 {% endblock %}

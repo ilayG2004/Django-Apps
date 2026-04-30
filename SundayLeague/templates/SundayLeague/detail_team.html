@@ -41,7 +41,7 @@ DATE: 4/18/2026
       {% if request.user.is_authenticated and request.user == team.team_admin %}
         <div class="admin-toolbar">
           <h2>Team Settings</h2>
-            <a href="{% url 'edit_team' team.pk %}">📝 Edit team</a>
+            <a href="{% url 'edit_team' team.pk %}">📝 Edit team </a>
             <a href="{% url 'check_team_requests' team.pk %}">📖 Check join requests </a>
             <a href="{% url 'kick_members' team.pk %}">🥾 Kick members </a>
         </div>

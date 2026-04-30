@@ -1,16 +1,13 @@
 {% extends 'SundayLeague/base.html' %}
 
 {% block content %}
+  <a href="{% url 'detail_team' team.pk %}" class="button">⬅️Back</a>
   {% if requests|length %}
-    {% if messages %}
-      <div class="alert alert-success">
-        {{ messages.0 }}
-      </div>
-    {% endif %}
-    <a href="{% url 'detail_team' team.pk %}">Back</a>
+    
     {% for req in requests.all %}
+      <h2>Requests</h2>
       <div>
-        <p><a href="{% url 'detail_profile' req.requesting_user.pk %}">{{ req.requesting_user.username }}</a> - {{ req.message }}</p>
+        <p><a href="{% url 'detail_profile' req.requesting_user.slprofile.pk %}">{{ req.requesting_user.username }}</a> - {{ req.message }}</p>
         <form method="POST" action="{% url 'create_member' team.pk req.requesting_user.pk %}">
           {% csrf_token %}
           <button type="submit">Approve</button>
@@ -22,6 +19,6 @@
       </div>
     {% endfor %}
   {% else %}
-    <p>No requests right now</p>
+    <h2>No requests right now</h2>
   {% endif %}
 {% endblock %}

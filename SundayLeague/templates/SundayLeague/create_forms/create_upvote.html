@@ -1,0 +1,18 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2> Give an upvote </h2>
+  <p> Commend your teammate for an outstanding attribute during your play-time together. </p>
+  <p> NOTE: You can only compliment your teammate for one attribute at a time. If you already gave them an upvote, the old one will be removed. </p>
+  <a href="{% url 'detail_profile' profile.pk %}" class="button">⬅️Back</a>
+  <div class="form-container">
+    <form method="POST">
+      {% csrf_token %}
+      <table>
+        {{form.as_table}}
+      </table>
+
+      <input type="submit" name="submit" value="Create">
+    </form>
+  </div>
+{% endblock %}

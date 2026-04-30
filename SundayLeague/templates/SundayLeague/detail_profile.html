@@ -7,14 +7,23 @@ DATE: 4/17/2026
 {% extends 'SundayLeague/base.html' %}
 
 {% block content %}
+
   {% if profile %} 
     <div class="profile-info-container">
-      <h2>{{profile.user.first_name}}</h2>
+      <div class="profile-row">
+        <h2>{{profile.user.first_name}}</h2>
       
-      <h3>{{profile.user.username}}</h3>
-      <div class="game-card-header">
-        <img src="{{profile.getImageUrl}}" class="team-pfp">
-        <p>{{profile.bio}}</p>
+        {% if request.user == profile.user %}
+          <a href="{% url 'edit_profile' profile.pk %}" class="button">📝 Edit Profile </a>
+        {% endif %}
+      </div>
+      <div class="profile-row">
+         <img src="{{profile.getImageUrl}}" class="user-main-pfp">
+        <div>
+            <h3>{{profile.user.username}}</h3>
+            <p>{{profile.bio}}</p>
+        </div>
+        
       </div>
     </div>
   {% endif %}
@@ -29,8 +38,14 @@ DATE: 4/17/2026
       {% for team in teams %}
       <tr>
         <td>
+          <a href="{% url 'detail_team' team.pk %}">
+           {% if team.picture %}
+            <img src="{{ team.getImageUrl }}" class="team-pfp">
+          {% else %}
+            <p class="team-pfp">❓</p>
+          {% endif %}
           <p>{{ team.name }}</p>
-          <img src="{{ team.getImageUrl }}" class="team-pfp">
+          </a>
         </td>
       </tr>
       {% endfor %}
@@ -38,16 +53,19 @@ DATE: 4/17/2026
   {% endif %}
 
   <h2>Upvotes</h2>
+  {% if request.user.is_authenticated and request.user != profile.user and is_teammate %}
+    <a class="button" href="{% url 'give_upvote' profile.pk %}">Give/Change Upvote</a>
+  {% endif %}
   {% if upvotes|length > 0 %}
   <table class="team-table">
     <tr>
       <th>Type</th>
       <th>Count</th>
     </tr>
-    {% for key, value in upvotes.items %}
+    {% for row in upvotes %}
       <tr>
-        <td>{{key}}</td>
-        <td>{{value}}</td>
+        <td>{{ row.label }}</td>
+        <td>{{ row.count }}</td>
       </tr>
     {% endfor %}
   </table>

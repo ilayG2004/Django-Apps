@@ -5,7 +5,7 @@
   <p> Teams can join sports leagues. Add a description so users can understand what brings your team together! </p>
   <p> NOTE: You will be designated the team admin. This role cannot be changed. You will be responsible for admitting new members to the team. And requesting to join leagues. </p>
   <div class="form-container">
-    <form method="POST" action="{% url 'create_team' %}">
+    <form method="POST" action="{% url 'create_team' %}" enctype="multipart/form-data">
       {% csrf_token %}
       <table>
         {{form.as_table}}

@@ -2,7 +2,7 @@
 {% block content %}
   <!-- Active teams -->
   <!-- Ideally we want filtering for active vs inactive stuff to be separate but that can be worried about later -->
-  {% include 'SundayLeague/search_forms/basic_filter.html' %}
+  {% include 'SundayLeague/search_forms/team_query.html' %}
 
   <h2> Managing Teams </h2>
   {% for team in managing %}

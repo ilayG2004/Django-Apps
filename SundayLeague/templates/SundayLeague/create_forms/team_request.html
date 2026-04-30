@@ -3,7 +3,7 @@
 {% block content %}
   <h2> Request to join a team. </h2>
   <p> Add a message so the team can get to know you. Requests will be approved or denied by this team's admin. Only the team admin can view your request. </p>
-  <a href="{% url 'detail_team' team.pk %}">Back</a>
+  <a href="{% url 'detail_team' team.pk %}" class="button">⬅️Back</a>
   <div class="form-container">
     <form method="POST">
       {% csrf_token %}

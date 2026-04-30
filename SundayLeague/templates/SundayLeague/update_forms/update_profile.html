@@ -1,0 +1,16 @@
+{% extends 'SundayLeague/base.html' %}
+
+{% block content %}
+  <h2> Update your user profile: </h2>
+  <a href="{% url 'detail_profile' profile.pk %}" class="button">⬅️Back</a>
+  <div class="form-container" enctype="multipart/form-data">
+    <form method="POST">
+      {% csrf_token %}
+      <table>
+        {{form.as_table}}
+      </table>
+
+      <input type="submit" name="submit" value="Update">
+    </form>
+  </div>
+{% endblock %}

@@ -32,6 +32,19 @@ class SLProfile(models.Model):
     """ Lets us gather the upvotes for a teammember """
     upvotes = Upvote.objects.filter(receiving_user = self.user)
     return upvotes
+  
+  def isTeamMate(self, another_user):
+    return Team.objects.filter(
+        teammember__user=self.user,
+        id__in=Team.objects.filter(teammember__user=another_user.user)
+    ).exists()
+  
+  def __str__(self):
+    """ Stringified representation of a model instance """
+    if self.user.first_name:
+      return ''+self.user.first_name
+    else:
+      return 'unknown user'
 
 class League(models.Model):
 
@@ -253,12 +266,21 @@ class Game(models.Model):
 
 class Upvote(models.Model):
   # Upvotes from another user - compliments for certain athletic feats during a match such as scoring capabilities, blocking, etc.
-  vote_type = models.CharField()
+  UPVOTE_TYPES = [
+      ("O", "Offense"),
+      ("D", "Defense"),
+      ("B", "Blocks"),
+      ("C", "Clutch"),
+      ("H", "Hustle"),
+      ("T", "Team Player"),
+      ("M", "Mentor"),
+  ]
+  
+  vote_type = models.CharField(blank=False, max_length=1, 
+                                choices = UPVOTE_TYPES)
   voting_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='voting_user')
   receiving_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receiving_user')
 
   def __str__(self):
     """ Stringified representation of a model instance """
     return '' + self.vote_type + ': ' + str(self.voting_user) + '-->' + str(self.receiving_user) 
-
-
